@@ -1,12 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { Home, Heart, PlusCircle, ShieldAlert, Settings } from "lucide-react";
+import { Home, Heart, PlusCircle, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MobileLayoutProps {
   children: React.ReactNode;
+  noNavRoutes?: string[];
 }
 
-export function MobileLayout({ children }: MobileLayoutProps) {
+export function MobileLayout({ children, noNavRoutes = [] }: MobileLayoutProps) {
   const [location] = useLocation();
 
   const tabs = [
@@ -16,7 +17,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
     { name: "Safety", href: "/safety", icon: ShieldAlert },
   ];
 
-  const hideNav = location === "/admin" || location.startsWith("/list"); // Optionally hide nav on form or admin
+  const hideNav = noNavRoutes.some((r) => location === r || location.startsWith(r + "/"));
 
   return (
     <div className="mx-auto max-w-[480px] bg-background min-h-[100dvh] shadow-xl relative flex flex-col overflow-hidden">
@@ -30,14 +31,14 @@ export function MobileLayout({ children }: MobileLayoutProps) {
             const isActive = location === tab.href;
             const Icon = tab.icon;
             return (
-              <Link 
-                key={tab.href} 
+              <Link
+                key={tab.href}
                 href={tab.href}
                 className={cn(
                   "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors",
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
-                data-testid={`nav-${tab.name.toLowerCase()}`}
+                data-testid={`nav-${tab.name.toLowerCase().replace(" ", "-")}`}
               >
                 <Icon size={24} className={cn(isActive && "fill-primary/20")} strokeWidth={isActive ? 2.5 : 2} />
                 <span className="text-[10px] font-medium">{tab.name}</span>
