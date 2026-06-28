@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useGetListings } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/listing-card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, UserCircle } from "lucide-react";
 import { ListingDetailSheet } from "@/components/listing-detail-sheet";
 
 export function Home() {
@@ -36,16 +37,26 @@ export function Home() {
   return (
     <div className="flex flex-col h-full bg-background">
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur pt-4 pb-2 px-4 border-b">
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search area or PG name..." 
-            className="pl-9 bg-card border-none shadow-sm"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+
+        <div className="flex items-center gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search area or PG name..."
+              className="pl-9 bg-card border-none shadow-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <Link
+            href="/login"
+            data-testid="nav-login"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-card shadow-sm border border-border text-muted-foreground hover:text-primary transition-colors shrink-0"
+          >
+            <UserCircle size={22} />
+          </Link>
         </div>
-        
+
         <div className="overflow-x-auto no-scrollbar pb-2 flex gap-2">
           {filterChips.map((chip) => (
             <button
@@ -93,9 +104,9 @@ export function Home() {
           </div>
         ) : (
           listings?.map((listing) => (
-            <ListingCard 
-              key={listing.id} 
-              listing={listing} 
+            <ListingCard
+              key={listing.id}
+              listing={listing}
               onClick={() => setSelectedListingId(listing.id)}
             />
           ))
@@ -103,9 +114,9 @@ export function Home() {
       </div>
 
       {selectedListingId && (
-        <ListingDetailSheet 
-          id={selectedListingId} 
-          onClose={() => setSelectedListingId(null)} 
+        <ListingDetailSheet
+          id={selectedListingId}
+          onClose={() => setSelectedListingId(null)}
         />
       )}
     </div>
