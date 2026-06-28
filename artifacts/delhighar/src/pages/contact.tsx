@@ -13,6 +13,7 @@ export function Contact() {
     "Listing Verification Issue",
     "Escrow / Payment Issue",
     "Account & Login Help",
+    "Account Deletion Request",
     "Feedback & Suggestions",
     "Other",
   ];
@@ -48,57 +49,57 @@ export function Contact() {
         <p className="text-white/70 text-sm">We're here to help. Reach out any time.</p>
       </div>
 
-      <div className="px-5 pt-6 space-y-5">
-        <div className="grid grid-cols-1 gap-3">
-          <a
-            href="mailto:support@delhighar.in"
-            data-testid="link-email"
-            className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4 active:scale-[0.98] transition"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Mail size={20} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Email Support</p>
-              <p className="text-sm font-semibold text-foreground">support@delhighar.in</p>
-            </div>
-          </a>
-
-          <a
-            href="tel:+911800000000"
-            data-testid="link-phone"
-            className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4 active:scale-[0.98] transition"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Phone size={20} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Helpline (Toll Free)</p>
-              <p className="text-sm font-semibold text-foreground">1800-000-0000</p>
-            </div>
-          </a>
-
-          <div className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Clock size={20} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Support Hours</p>
-              <p className="text-sm font-semibold text-foreground">Mon – Sat, 9 AM – 7 PM</p>
-            </div>
+      <div className="px-5 pt-6 space-y-3">
+        <a
+          href="tel:+919696149694"
+          data-testid="link-phone"
+          className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4 active:scale-[0.98] transition"
+        >
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Phone size={20} className="text-primary" />
           </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Call / WhatsApp</p>
+            <p className="text-sm font-semibold text-foreground">+91 96961 49694</p>
+          </div>
+        </a>
 
-          <div className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <MapPin size={20} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Office Address</p>
-              <p className="text-sm font-semibold text-foreground">New Delhi, India – 110001</p>
-            </div>
+        <a
+          href="mailto:mishra250zxclp@gmail.com"
+          data-testid="link-email"
+          className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4 active:scale-[0.98] transition"
+        >
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Mail size={20} className="text-primary" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Email Support</p>
+            <p className="text-sm font-semibold text-foreground">mishra250zxclp@gmail.com</p>
+          </div>
+        </a>
+
+        <div className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Clock size={20} className="text-primary" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Support Hours</p>
+            <p className="text-sm font-semibold text-foreground">Mon – Sat, 9 AM – 7 PM</p>
           </div>
         </div>
 
+        <div className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <MapPin size={20} className="text-primary" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Based In</p>
+            <p className="text-sm font-semibold text-foreground">New Delhi, India</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-5 mt-5">
         <div className="border-t border-border pt-5">
           <h2 className="font-bold text-foreground text-base mb-4">Send Us a Message</h2>
 
@@ -156,7 +157,7 @@ export function Contact() {
                   rows={4}
                   placeholder="Describe your issue or question in detail..."
                   value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  onChange={(e) => setForm({ ...form, message: e.target.value.slice(0, 500) })}
                   data-testid="textarea-message"
                   className={`w-full px-4 py-3 rounded-xl bg-card border text-sm outline-none focus:ring-2 focus:ring-primary/40 transition resize-none ${errors.message ? "border-destructive" : "border-border"}`}
                 />
@@ -182,7 +183,7 @@ export function Contact() {
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">Message Sent!</h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                Thank you for reaching out. Our team will get back to you within 1–2 business days at{" "}
+                Thank you for reaching out. We will get back to you within 1–2 business days at{" "}
                 <strong className="text-foreground">{form.email}</strong>.
               </p>
               <button
@@ -197,8 +198,11 @@ export function Contact() {
           )}
         </div>
 
-        <div className="pt-2 text-center">
-          <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground" data-testid="link-privacy">
+        <div className="mt-6 text-center pb-4">
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} DelhiGhar. All rights reserved.
+          </p>
+          <Link href="/privacy" className="text-xs text-primary mt-1 block" data-testid="link-privacy">
             Privacy Policy
           </Link>
         </div>

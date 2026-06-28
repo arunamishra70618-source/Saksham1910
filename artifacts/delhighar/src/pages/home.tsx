@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useGetListings } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/listing-card";
 import { Input } from "@/components/ui/input";
-import { Search, UserCircle, LogOut } from "lucide-react";
+import { Search, UserCircle, LogOut, Shield, Phone } from "lucide-react";
 import { ListingDetailSheet } from "@/components/listing-detail-sheet";
 import { useAuth } from "@/lib/auth";
 
@@ -58,20 +58,47 @@ export function Home() {
             >
               <UserCircle size={22} />
             </button>
+
             {showUserMenu && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
-                <div className="absolute right-0 top-12 z-20 bg-card border border-border rounded-xl shadow-lg p-3 min-w-[180px]">
-                  <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
-                  <p className="text-sm font-semibold text-foreground truncate mb-3">{user?.email}</p>
-                  <button
-                    onClick={() => { logout(); setShowUserMenu(false); }}
-                    data-testid="button-logout"
-                    className="flex items-center gap-2 text-destructive text-sm font-medium w-full"
-                  >
-                    <LogOut size={15} />
-                    Log Out
-                  </button>
+                <div className="absolute right-0 top-12 z-20 bg-card border border-border rounded-2xl shadow-xl p-4 min-w-[220px]">
+                  <div className="mb-3 pb-3 border-b border-border">
+                    <p className="text-xs text-muted-foreground">Logged in as</p>
+                    <p className="text-sm font-semibold text-foreground truncate mt-0.5">{user?.email}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Link
+                      href="/privacy"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2.5 text-sm text-foreground py-2 px-1 rounded-lg hover:bg-muted transition-colors w-full"
+                      data-testid="menu-privacy"
+                    >
+                      <Shield size={16} className="text-muted-foreground" />
+                      Privacy Policy
+                    </Link>
+                    <Link
+                      href="/contact"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2.5 text-sm text-foreground py-2 px-1 rounded-lg hover:bg-muted transition-colors w-full"
+                      data-testid="menu-contact"
+                    >
+                      <Phone size={16} className="text-muted-foreground" />
+                      Contact Us
+                    </Link>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <button
+                      onClick={() => { logout(); setShowUserMenu(false); }}
+                      data-testid="button-logout"
+                      className="flex items-center gap-2.5 text-destructive text-sm font-medium w-full py-2 px-1 rounded-lg hover:bg-destructive/10 transition-colors"
+                    >
+                      <LogOut size={16} />
+                      Log Out
+                    </button>
+                  </div>
                 </div>
               </>
             )}
@@ -120,9 +147,7 @@ export function Home() {
             <div key={i} className="h-32 bg-card rounded-xl animate-pulse"></div>
           ))
         ) : listings?.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground">
-            No listings found.
-          </div>
+          <div className="text-center py-10 text-muted-foreground">No listings found.</div>
         ) : (
           listings?.map((listing) => (
             <ListingCard
