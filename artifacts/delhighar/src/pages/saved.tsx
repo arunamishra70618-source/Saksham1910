@@ -19,8 +19,8 @@ export function Saved() {
         ) : !listings || listings.length === 0 ? (
           <div className="text-center py-20">
             <Heart className="w-12 h-12 text-muted mx-auto mb-4" />
-            <h2 className="text-lg font-bold text-foreground mb-2">Koi saved listing nahi hai abhi ❤️</h2>
-            <p className="text-sm text-muted-foreground">Go to Browse to find properties.</p>
+            <h2 className="text-lg font-bold text-foreground mb-2">No saved listings yet</h2>
+            <p className="text-sm text-muted-foreground">Tap the heart icon on any listing to save it here.</p>
           </div>
         ) : (
           listings.map((listing) => (

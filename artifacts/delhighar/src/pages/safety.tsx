@@ -23,7 +23,7 @@ export function Safety() {
     {
       title: "Escrow Safe Pay",
       icon: <CreditCard className="w-6 h-6 text-blue-500" />,
-      desc: "Token money is held safely by us. It's released to the owner only after you visit and confirm.",
+      desc: "Token money is held safely by us. It is released to the owner only after you visit and confirm.",
       color: "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900"
     },
     {
@@ -43,7 +43,7 @@ export function Safety() {
   return (
     <div className="flex flex-col h-full bg-background">
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur py-4 px-4 border-b">
-        <h1 className="text-2xl font-bold text-foreground">Safety Guide 🛡️</h1>
+        <h1 className="text-2xl font-bold text-foreground">Safety Guide</h1>
         <p className="text-sm text-muted-foreground mt-1">DelhiGhar keeps you safe from brokers and frauds.</p>
       </div>
 

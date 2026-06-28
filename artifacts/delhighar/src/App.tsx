@@ -1,8 +1,9 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { MobileLayout } from "@/components/layout/mobile-layout";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { Home } from "@/pages/home";
 import { Saved } from "@/pages/saved";
 import { Safety } from "@/pages/safety";
@@ -16,23 +17,36 @@ import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
+const PUBLIC_ROUTES = ["/login", "/forgot-password", "/privacy", "/contact"];
 const NO_NAV_ROUTES = ["/login", "/forgot-password", "/privacy", "/contact", "/admin"];
+
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn } = useAuth();
+  const [location] = useLocation();
+  const isPublic = PUBLIC_ROUTES.some(r => location === r || location.startsWith(r + "/"));
+  if (!isLoggedIn && !isPublic) {
+    return <Redirect to="/login" />;
+  }
+  return <>{children}</>;
+}
 
 function Router() {
   return (
     <MobileLayout noNavRoutes={NO_NAV_ROUTES}>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/saved" component={Saved} />
-        <Route path="/safety" component={Safety} />
-        <Route path="/list" component={ListProperty} />
-        <Route path="/admin" component={AdminPanel} />
-        <Route path="/login" component={Login} />
-        <Route path="/forgot-password" component={ForgotPassword} />
-        <Route path="/privacy" component={PrivacyPolicy} />
-        <Route path="/contact" component={Contact} />
-        <Route component={NotFound} />
-      </Switch>
+      <AuthGuard>
+        <Switch>
+          <Route path="/login" component={Login} />
+          <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/privacy" component={PrivacyPolicy} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/" component={Home} />
+          <Route path="/saved" component={Saved} />
+          <Route path="/safety" component={Safety} />
+          <Route path="/list" component={ListProperty} />
+          <Route path="/admin" component={AdminPanel} />
+          <Route component={NotFound} />
+        </Switch>
+      </AuthGuard>
     </MobileLayout>
   );
 }
@@ -41,9 +55,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL?.replace(/\/$/, "") || ""}>
-          <Router />
-        </WouterRouter>
+        <AuthProvider>
+          <WouterRouter base={import.meta.env.BASE_URL?.replace(/\/$/, "") || ""}>
+            <Router />
+          </WouterRouter>
+        </AuthProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
