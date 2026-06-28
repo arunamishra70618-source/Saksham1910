@@ -1,22 +1,31 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: DelhiGhar API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: listings
+    description: Property listing operations
+  - name: visits
+    description: Property visit scheduling
+  - name: payments
+    description: Escrow payment operations
+  - name: reports
+    description: Fraud report operations
+  - name: admin
+    description: Admin operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +33,813 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /listings:
+    get:
+      operationId: getListings
+      tags: [listings]
+      summary: Get all listings with optional filters
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+        - in: query
+          name: gender
+          schema:
+            type: string
+        - in: query
+          name: budgetMin
+          schema:
+            type: integer
+        - in: query
+          name: budgetMax
+          schema:
+            type: integer
+        - in: query
+          name: verifiedOnly
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+    post:
+      operationId: createListing
+      tags: [listings]
+      summary: Create a new listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/stats:
+    get:
+      operationId: getListingStats
+      tags: [listings]
+      summary: Get summary stats for dashboard
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingStats"
+
+  /listings/saved:
+    get:
+      operationId: getSavedListings
+      tags: [listings]
+      summary: Get saved listings for a user
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+  /listings/{id}:
+    get:
+      operationId: getListing
+      tags: [listings]
+      summary: Get a listing by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Listing detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateListing
+      tags: [listings]
+      summary: Update a listing
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+    delete:
+      operationId: deleteListing
+      tags: [listings]
+      summary: Delete a listing
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /listings/{id}/save:
+    post:
+      operationId: saveListing
+      tags: [listings]
+      summary: Save or unsave a listing
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveInput"
+      responses:
+        "200":
+          description: Save toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveResult"
+
+  /listings/{id}/reveal-phone:
+    post:
+      operationId: revealPhone
+      tags: [listings]
+      summary: Reveal owner phone number for a listing
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RevealPhoneInput"
+      responses:
+        "200":
+          description: Phone revealed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhoneRevealResult"
+
+  /visits:
+    post:
+      operationId: scheduleVisit
+      tags: [visits]
+      summary: Schedule a property visit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisitInput"
+      responses:
+        "201":
+          description: Visit scheduled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Visit"
+
+  /visits/{id}/confirm:
+    post:
+      operationId: confirmVisit
+      tags: [visits]
+      summary: Owner confirms a scheduled visit
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Visit confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Visit"
+
+  /payments/create-order:
+    post:
+      operationId: createEscrowOrder
+      tags: [payments]
+      summary: Create a Razorpay escrow order for token money
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscrowOrderInput"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EscrowOrder"
+
+  /payments/confirm:
+    post:
+      operationId: confirmPayment
+      tags: [payments]
+      summary: Confirm payment and hold in escrow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentConfirmInput"
+      responses:
+        "200":
+          description: Payment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResult"
+
+  /payments/release:
+    post:
+      operationId: releaseEscrow
+      tags: [payments]
+      summary: Release escrowed payment to owner after visit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscrowActionInput"
+      responses:
+        "200":
+          description: Escrow released
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResult"
+
+  /payments/refund:
+    post:
+      operationId: refundEscrow
+      tags: [payments]
+      summary: Refund escrowed payment to buyer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscrowActionInput"
+      responses:
+        "200":
+          description: Refunded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResult"
+
+  /reports:
+    post:
+      operationId: createReport
+      tags: [reports]
+      summary: File a fraud report against a listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportInput"
+      responses:
+        "201":
+          description: Report filed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+
+  /reports/{listingId}:
+    get:
+      operationId: getReports
+      tags: [reports]
+      summary: Get fraud reports for a listing
+      parameters:
+        - in: path
+          name: listingId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reports list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+
+  /admin/listings:
+    get:
+      operationId: getAdminListings
+      tags: [admin]
+      summary: Get all listings for admin review
+      parameters:
+        - in: query
+          name: password
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Admin listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+        "401":
+          description: Unauthorized
+
+  /admin/listings/{id}/verify-aadhaar:
+    post:
+      operationId: verifyAadhaar
+      tags: [admin]
+      summary: Approve or reject Aadhaar verification
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AadhaarVerifyInput"
+      responses:
+        "200":
+          description: Verification updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        "401":
+          description: Unauthorized
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Listing:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - gender
+        - area
+        - gali
+        - landmark
+        - rent
+        - deposit
+        - roomType
+        - ownerName
+        - ownerPhone
+        - verificationStatus
+        - escrowEnabled
+        - amenities
+        - securityFeatures
+        - curfewTime
+        - guestPolicy
+        - smokingAllowed
+        - alcoholAllowed
+        - nonVegAllowed
+        - photos
+        - visitCount
+        - fraudReportCount
+        - rating
+        - reviewCount
+        - isHidden
+        - createdAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        gender:
+          type: string
+        area:
+          type: string
+        gali:
+          type: string
+        landmark:
+          type: string
+        mapsLink:
+          type: ["string", "null"]
+        rent:
+          type: integer
+        deposit:
+          type: integer
+        roomType:
+          type: string
+        ownerName:
+          type: string
+        ownerPhone:
+          type: string
+        alternatePhone:
+          type: ["string", "null"]
+        verificationStatus:
+          type: string
+        aadhaarImageUrl:
+          type: ["string", "null"]
+        escrowEnabled:
+          type: boolean
+        amenities:
+          type: array
+          items:
+            type: string
+        securityFeatures:
+          type: array
+          items:
+            type: string
+        curfewTime:
+          type: string
+        guestPolicy:
+          type: string
+        smokingAllowed:
+          type: boolean
+        alcoholAllowed:
+          type: boolean
+        nonVegAllowed:
+          type: boolean
+        photos:
+          type: array
+          items:
+            type: string
+        visitCount:
+          type: integer
+        fraudReportCount:
+          type: integer
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        isHidden:
+          type: boolean
+        createdAt:
+          type: string
+
+    ListingInput:
+      type: object
+      required:
+        - name
+        - type
+        - gender
+        - area
+        - gali
+        - landmark
+        - rent
+        - deposit
+        - roomType
+        - ownerName
+        - ownerPhone
+        - amenities
+        - securityFeatures
+        - curfewTime
+        - guestPolicy
+        - smokingAllowed
+        - alcoholAllowed
+        - nonVegAllowed
+        - photos
+        - escrowEnabled
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        gender:
+          type: string
+        area:
+          type: string
+        gali:
+          type: string
+        landmark:
+          type: string
+        mapsLink:
+          type: string
+        rent:
+          type: integer
+        deposit:
+          type: integer
+        roomType:
+          type: string
+        ownerName:
+          type: string
+        ownerPhone:
+          type: string
+        alternatePhone:
+          type: string
+        aadhaarConsent:
+          type: boolean
+        aadhaarImageUrl:
+          type: string
+        escrowEnabled:
+          type: boolean
+        amenities:
+          type: array
+          items:
+            type: string
+        securityFeatures:
+          type: array
+          items:
+            type: string
+        curfewTime:
+          type: string
+        guestPolicy:
+          type: string
+        smokingAllowed:
+          type: boolean
+        alcoholAllowed:
+          type: boolean
+        nonVegAllowed:
+          type: boolean
+        photos:
+          type: array
+          items:
+            type: string
+
+    ListingUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        rent:
+          type: integer
+        deposit:
+          type: integer
+        verificationStatus:
+          type: string
+        isHidden:
+          type: boolean
+        fraudReportCount:
+          type: integer
+
+    ListingStats:
+      type: object
+      required:
+        - totalListings
+        - verifiedListings
+        - pgCount
+        - flatCount
+        - hostelCount
+        - avgRent
+        - escrowEnabledCount
+        - recentListings
+      properties:
+        totalListings:
+          type: integer
+        verifiedListings:
+          type: integer
+        pgCount:
+          type: integer
+        flatCount:
+          type: integer
+        hostelCount:
+          type: integer
+        avgRent:
+          type: integer
+        escrowEnabledCount:
+          type: integer
+        recentListings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Listing"
+
+    SaveInput:
+      type: object
+      required: [userId, action]
+      properties:
+        userId:
+          type: string
+        action:
+          type: string
+
+    SaveResult:
+      type: object
+      required: [saved]
+      properties:
+        saved:
+          type: boolean
+
+    RevealPhoneInput:
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+
+    PhoneRevealResult:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+        alternatePhone:
+          type: ["string", "null"]
+
+    VisitInput:
+      type: object
+      required: [listingId, buyerName, buyerPhone, visitDate, userId]
+      properties:
+        listingId:
+          type: string
+        buyerName:
+          type: string
+        buyerPhone:
+          type: string
+        visitDate:
+          type: string
+        userId:
+          type: string
+
+    Visit:
+      type: object
+      required: [id, listingId, buyerName, buyerPhone, visitDate, status, createdAt]
+      properties:
+        id:
+          type: string
+        listingId:
+          type: string
+        buyerName:
+          type: string
+        buyerPhone:
+          type: string
+        visitDate:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+
+    EscrowOrderInput:
+      type: object
+      required: [listingId, buyerId, amount]
+      properties:
+        listingId:
+          type: string
+        buyerId:
+          type: string
+        amount:
+          type: integer
+
+    EscrowOrder:
+      type: object
+      required: [orderId, amount, currency, keyId]
+      properties:
+        orderId:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        keyId:
+          type: string
+
+    PaymentConfirmInput:
+      type: object
+      required: [orderId, paymentId, signature, listingId, buyerId]
+      properties:
+        orderId:
+          type: string
+        paymentId:
+          type: string
+        signature:
+          type: string
+        listingId:
+          type: string
+        buyerId:
+          type: string
+
+    EscrowActionInput:
+      type: object
+      required: [paymentId, listingId]
+      properties:
+        paymentId:
+          type: string
+        listingId:
+          type: string
+        password:
+          type: string
+
+    PaymentResult:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    ReportInput:
+      type: object
+      required: [listingId, reporterId, reasons]
+      properties:
+        listingId:
+          type: string
+        reporterId:
+          type: string
+        reasons:
+          type: array
+          items:
+            type: string
+        details:
+          type: string
+
+    Report:
+      type: object
+      required: [id, listingId, reporterId, reasons, createdAt]
+      properties:
+        id:
+          type: string
+        listingId:
+          type: string
+        reporterId:
+          type: string
+        reasons:
+          type: array
+          items:
+            type: string
+        details:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AadhaarVerifyInput:
+      type: object
+      required: [action, password]
+      properties:
+        action:
+          type: string
+        password:
+          type: string

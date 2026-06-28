@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "DelhiGhar"
+version = "1.0.0"
+id = "artifacts/delhighar"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25056
+
+[services.development]
+run = "pnpm --filter @workspace/delhighar run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/delhighar", "run", "build" ]
+publicDir = "artifacts/delhighar/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25056"
+BASE_PATH = "/"
