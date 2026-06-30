@@ -19,6 +19,10 @@ export interface Listing {
   landmark: string;
   /** @nullable */
   mapsLink?: string | null;
+  /** @nullable */
+  lat?: string | null;
+  /** @nullable */
+  lng?: string | null;
   rent: number;
   deposit: number;
   roomType: string;

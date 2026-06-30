@@ -11,6 +11,8 @@ export const listingsTable = pgTable("listings", {
   gali: text("gali").notNull(),
   landmark: text("landmark").notNull(),
   mapsLink: text("maps_link"),
+  lat: text("lat"),
+  lng: text("lng"),
   rent: integer("rent").notNull(),
   deposit: integer("deposit").notNull(),
   roomType: text("room_type").notNull(),
