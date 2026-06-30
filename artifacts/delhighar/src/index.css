@@ -43,66 +43,66 @@
 }
 
 :root {
-  --background: 30 25% 95%; /* #F7F3EF */
-  --foreground: 226 42% 18%; /* #1A2340 */
+  --background: 240 20% 97%;       /* Cool light #F5F5FA */
+  --foreground: 250 40% 14%;       /* Deep violet-navy #17143D */
 
   --card: 0 0% 100%;
-  --card-foreground: 226 42% 18%;
-  --card-border: 30 10% 85%;
+  --card-foreground: 250 40% 14%;
+  --card-border: 240 15% 88%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 226 42% 18%;
-  --popover-border: 30 10% 85%;
+  --popover-foreground: 250 40% 14%;
+  --popover-border: 240 15% 88%;
 
-  --primary: 23 83% 50%; /* #E8631A */
+  --primary: 262 83% 57%;          /* Deep Violet #7C3AED */
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 226 42% 18%; /* #1A2340 */
+  --secondary: 250 40% 14%;        /* Deep violet-navy #17143D */
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 30 15% 90%;
-  --muted-foreground: 226 20% 40%;
+  --muted: 240 15% 92%;
+  --muted-foreground: 250 20% 42%;
 
-  --accent: 30 25% 90%;
-  --accent-foreground: 226 42% 18%;
+  --accent: 262 60% 94%;           /* Soft violet tint */
+  --accent-foreground: 262 83% 40%;
 
-  --destructive: 2 76% 55%; /* #E53935 */
+  --destructive: 2 76% 55%;        /* #E53935 */
   --destructive-foreground: 0 0% 100%;
 
-  --success: 141 73% 42%; /* #1DB954 */
+  --success: 141 73% 42%;          /* #1DB954 */
   --success-foreground: 0 0% 100%;
 
-  --border: 30 15% 85%;
-  --input: 30 15% 85%;
-  --ring: 23 83% 50%;
+  --border: 240 15% 88%;
+  --input: 240 15% 88%;
+  --ring: 262 83% 57%;
 
   --app-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --radius: 0.75rem; 
+  --radius: 0.75rem;
 }
 
 .dark {
-  --background: 226 42% 12%; 
-  --foreground: 30 25% 95%; 
+  --background: 250 40% 10%;
+  --foreground: 240 20% 96%;
 
-  --card: 226 42% 16%;
-  --card-foreground: 30 25% 95%;
-  --card-border: 226 42% 22%;
+  --card: 250 40% 14%;
+  --card-foreground: 240 20% 96%;
+  --card-border: 250 40% 20%;
 
-  --popover: 226 42% 16%;
-  --popover-foreground: 30 25% 95%;
-  --popover-border: 226 42% 22%;
+  --popover: 250 40% 14%;
+  --popover-foreground: 240 20% 96%;
+  --popover-border: 250 40% 20%;
 
-  --primary: 23 83% 50%;
+  --primary: 262 83% 63%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 226 42% 24%;
+  --secondary: 250 40% 20%;
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 226 42% 20%;
-  --muted-foreground: 30 15% 75%;
+  --muted: 250 40% 18%;
+  --muted-foreground: 240 15% 72%;
 
-  --accent: 226 42% 24%;
-  --accent-foreground: 30 25% 95%;
+  --accent: 262 40% 22%;
+  --accent-foreground: 262 83% 80%;
 
   --destructive: 2 76% 55%;
   --destructive-foreground: 0 0% 100%;
@@ -110,9 +110,9 @@
   --success: 141 73% 42%;
   --success-foreground: 0 0% 100%;
 
-  --border: 226 42% 24%;
-  --input: 226 42% 24%;
-  --ring: 23 83% 50%;
+  --border: 250 40% 22%;
+  --input: 250 40% 22%;
+  --ring: 262 83% 63%;
 }
 
 @layer base {

@@ -39,7 +39,7 @@ export function PropertyMap({ lat, lng, name, area }: PropertyMapProps) {
       }).addTo(map);
 
       const pgIcon = L.divIcon({
-        html: `<div style="background:#E8631A;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center">
+        html: `<div style="background:#7C3AED;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(124,58,237,0.4);display:flex;align-items:center;justify-content:center">
                  <span style="transform:rotate(45deg);display:block;width:10px;height:10px;background:white;border-radius:50%"></span>
                </div>`,
         className: "",
