@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, ShieldCheck, BadgeCheck, AlertTriangle } from "lucide-react";
+import { Heart, ShieldCheck, BadgeCheck, AlertTriangle, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Listing, useSaveListing } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
@@ -9,11 +9,15 @@ export function ListingCard({
   isSaved = false,
   onClick,
   index = 0,
+  manageMode = false,
+  onDeletePress,
 }: {
   listing: Listing;
   isSaved?: boolean;
   onClick?: () => void;
   index?: number;
+  manageMode?: boolean;
+  onDeletePress?: () => void;
 }) {
   const { toast } = useToast();
   const saveMutation = useSaveListing();
@@ -22,6 +26,7 @@ export function ListingCard({
 
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (manageMode) return;
     const newSaved = !saved;
     setSaved(newSaved);
     setHeartAnim(true);
@@ -43,30 +48,41 @@ export function ListingCard({
   if (isAadhaarVerified) accentClass = "border-l-4 border-l-success";
   else if (isPhoneVerified) accentClass = "border-l-4 border-l-amber-400";
   if (hasFraud) accentClass = "border-l-4 border-l-destructive";
+  if (manageMode) accentClass = "border-l-4 border-l-destructive/40";
 
   return (
     <div
-      className={`bg-card rounded-2xl p-4 shadow-sm cursor-pointer relative overflow-hidden
+      className={`bg-card rounded-2xl p-4 shadow-sm relative overflow-hidden
         ${accentClass}
         transition-all duration-200 ease-out
-        hover:shadow-md active:scale-[0.985]
+        ${manageMode ? "ring-1 ring-destructive/20" : "hover:shadow-md active:scale-[0.985] cursor-pointer"}
         animate-in fade-in slide-in-from-bottom-3`}
       style={{ animationDelay: `${index * 70}ms`, animationFillMode: "both" }}
-      onClick={onClick}
+      onClick={manageMode ? undefined : onClick}
       data-testid={`card-listing-${listing.id}`}
     >
-      <button
-        className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
-        onClick={handleSave}
-        aria-label={saved ? "Remove from saved" : "Save listing"}
-      >
-        <Heart
-          size={20}
-          className={`transition-all duration-200 ${
-            heartAnim ? "scale-125" : "scale-100"
-          } ${saved ? "fill-destructive text-destructive" : "text-muted-foreground"}`}
-        />
-      </button>
+      {manageMode ? (
+        <button
+          onClick={(e) => { e.stopPropagation(); onDeletePress?.(); }}
+          className="absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-xl bg-destructive text-white shadow-sm active:scale-90 transition-transform"
+          aria-label="Delete listing"
+        >
+          <Trash2 size={16} />
+        </button>
+      ) : (
+        <button
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          onClick={handleSave}
+          aria-label={saved ? "Remove from saved" : "Save listing"}
+        >
+          <Heart
+            size={20}
+            className={`transition-all duration-200 ${
+              heartAnim ? "scale-125" : "scale-100"
+            } ${saved ? "fill-destructive text-destructive" : "text-muted-foreground"}`}
+          />
+        </button>
+      )}
 
       <div className="pr-10">
         <h3 className="font-bold text-lg text-foreground line-clamp-1 leading-tight">{listing.name}</h3>
@@ -119,6 +135,12 @@ export function ListingCard({
           <div className="mt-3 text-xs text-destructive flex items-center gap-1.5 bg-destructive/10 px-3 py-2 rounded-lg font-medium">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
             ⚠️ {listing.fraudReportCount} fraud report{listing.fraudReportCount > 1 ? "s" : ""} — proceed with caution
+          </div>
+        )}
+
+        {manageMode && (
+          <div className="mt-2 text-[10px] text-destructive/60 font-medium">
+            Tap 🗑️ to delete this listing
           </div>
         )}
       </div>

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useGetListings } from "@workspace/api-client-react";
+import { useGetListings, useDeleteListing } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/listing-card";
 import { Input } from "@/components/ui/input";
-import { Search, UserCircle, LogOut, Shield, Phone } from "lucide-react";
+import { Search, UserCircle, LogOut, Shield, Phone, Trash2, X, ShieldCheck } from "lucide-react";
 import { ListingDetailSheet } from "@/components/listing-detail-sheet";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 
 export function Home() {
   const { user, logout } = useAuth();
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [type, setType] = useState<string>("");
   const [gender, setGender] = useState<string>("");
@@ -16,7 +18,18 @@ export function Home() {
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const { data: listings, isLoading } = useGetListings({
+  const [manageMode, setManageMode] = useState(false);
+  const [showAdminPrompt, setShowAdminPrompt] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminError, setAdminError] = useState(false);
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+
+  const deleteMutation = useDeleteListing();
+
+  const { data: listings, isLoading, refetch } = useGetListings({
     search: search || undefined,
     type: type || undefined,
     gender: gender || undefined,
@@ -37,6 +50,41 @@ export function Home() {
     { label: "Co-ed", value: "Co-ed" },
   ];
 
+  const handleAdminUnlock = () => {
+    if (adminPassword === "admin123") {
+      setManageMode(true);
+      setShowAdminPrompt(false);
+      setAdminPassword("");
+      setAdminError(false);
+      setShowUserMenu(false);
+      toast({ title: "🗑️ Manage mode ON — tap trash to delete any listing" });
+    } else {
+      setAdminError(true);
+    }
+  };
+
+  const handleDeleteConfirm = (id: string) => {
+    setDeletingId(id);
+    deleteMutation.mutate(
+      { id },
+      {
+        onSuccess: () => {
+          setDeletedIds((prev) => new Set([...prev, id]));
+          setConfirmId(null);
+          setDeletingId(null);
+          toast({ title: "🗑️ Listing deleted" });
+          setTimeout(() => refetch(), 400);
+        },
+        onError: () => {
+          setDeletingId(null);
+          toast({ title: "Failed to delete", variant: "destructive" });
+        },
+      }
+    );
+  };
+
+  const visibleListings = listings?.filter((l) => !deletedIds.has(l.id));
+
   return (
     <div className="flex flex-col h-full bg-background">
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur pt-4 pb-2 px-4 border-b">
@@ -54,27 +102,47 @@ export function Home() {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              data-testid="nav-user"
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card shadow-sm border border-border text-primary transition-all duration-200 active:scale-90 shrink-0"
+              className={`w-10 h-10 flex items-center justify-center rounded-xl shadow-sm border transition-all duration-200 active:scale-90 shrink-0 ${
+                manageMode
+                  ? "bg-destructive border-destructive text-white"
+                  : "bg-card border-border text-primary"
+              }`}
             >
-              <UserCircle size={22} />
+              {manageMode ? <Trash2 size={18} /> : <UserCircle size={22} />}
             </button>
 
             {showUserMenu && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
-                <div className="absolute right-0 top-12 z-20 bg-card border border-border rounded-2xl shadow-xl p-4 min-w-[220px] animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute right-0 top-12 z-20 bg-card border border-border rounded-2xl shadow-xl p-4 min-w-[230px] animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="mb-3 pb-3 border-b border-border">
                     <p className="text-xs text-muted-foreground">Logged in as</p>
                     <p className="text-sm font-semibold text-foreground truncate mt-0.5">{user?.email}</p>
                   </div>
 
                   <div className="space-y-0.5">
+                    {!manageMode ? (
+                      <button
+                        onClick={() => { setShowAdminPrompt(true); setShowUserMenu(false); }}
+                        className="flex items-center gap-2.5 text-sm text-destructive font-semibold py-2 px-2 rounded-lg hover:bg-destructive/10 transition-colors w-full"
+                      >
+                        <Trash2 size={15} />
+                        Delete Listings (Admin)
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => { setManageMode(false); setConfirmId(null); setShowUserMenu(false); }}
+                        className="flex items-center gap-2.5 text-sm text-muted-foreground font-semibold py-2 px-2 rounded-lg hover:bg-muted transition-colors w-full"
+                      >
+                        <X size={15} />
+                        Exit Manage Mode
+                      </button>
+                    )}
+
                     <Link
                       href="/privacy"
                       onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 text-sm text-foreground py-2 px-2 rounded-lg hover:bg-muted transition-colors w-full"
-                      data-testid="menu-privacy"
                     >
                       <Shield size={15} className="text-muted-foreground" />
                       Privacy Policy
@@ -83,7 +151,6 @@ export function Home() {
                       href="/contact"
                       onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 text-sm text-foreground py-2 px-2 rounded-lg hover:bg-muted transition-colors w-full"
-                      data-testid="menu-contact"
                     >
                       <Phone size={15} className="text-muted-foreground" />
                       Contact Us
@@ -93,7 +160,6 @@ export function Home() {
                   <div className="mt-3 pt-3 border-t border-border">
                     <button
                       onClick={() => { logout(); setShowUserMenu(false); }}
-                      data-testid="button-logout"
                       className="flex items-center gap-2.5 text-destructive text-sm font-medium w-full py-2 px-2 rounded-lg hover:bg-destructive/10 transition-colors"
                     >
                       <LogOut size={15} />
@@ -105,6 +171,21 @@ export function Home() {
             )}
           </div>
         </div>
+
+        {manageMode && (
+          <div className="flex items-center justify-between bg-destructive/10 border border-destructive/20 rounded-xl px-3 py-2 mb-2 animate-in fade-in duration-200">
+            <div className="flex items-center gap-2 text-destructive text-xs font-semibold">
+              <Trash2 size={13} />
+              Manage Mode — tap 🗑️ on any listing to delete
+            </div>
+            <button
+              onClick={() => { setManageMode(false); setConfirmId(null); }}
+              className="text-destructive hover:text-destructive/70 transition-colors"
+            >
+              <X size={15} />
+            </button>
+          </div>
+        )}
 
         <div className="overflow-x-auto no-scrollbar pb-2 flex gap-2">
           {filterChips.map((chip) => (
@@ -157,29 +238,106 @@ export function Home() {
               style={{ animationDelay: `${i * 100}ms` }}
             />
           ))
-        ) : listings?.length === 0 ? (
+        ) : visibleListings?.length === 0 ? (
           <div className="text-center py-16 animate-in fade-in duration-300">
             <p className="text-4xl mb-3">🏠</p>
             <p className="font-semibold text-foreground">No listings found</p>
             <p className="text-sm text-muted-foreground mt-1">Try a different search or filter</p>
           </div>
         ) : (
-          listings?.map((listing, i) => (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              index={i}
-              onClick={() => setSelectedListingId(listing.id)}
-            />
+          visibleListings?.map((listing, i) => (
+            <div key={listing.id}>
+              {confirmId === listing.id ? (
+                <div className="bg-destructive/5 border border-destructive/30 rounded-2xl p-4 animate-in fade-in duration-200">
+                  <p className="font-semibold text-destructive text-sm mb-1 flex items-center gap-2">
+                    <Trash2 size={14} /> Delete this listing?
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    <span className="font-semibold text-foreground">{listing.name}</span> — {listing.area}
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-4">This cannot be undone.</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleDeleteConfirm(listing.id)}
+                      disabled={deletingId === listing.id}
+                      className="flex-1 bg-destructive text-white font-semibold py-2.5 rounded-xl text-sm active:scale-95 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      <Trash2 size={13} />
+                      {deletingId === listing.id ? "Deleting..." : "Yes, Delete"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmId(null)}
+                      className="flex-1 bg-muted text-foreground font-semibold py-2.5 rounded-xl text-sm active:scale-95 transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <ListingCard
+                  listing={listing}
+                  index={i}
+                  manageMode={manageMode}
+                  onDeletePress={() => setConfirmId(listing.id)}
+                  onClick={manageMode ? undefined : () => setSelectedListingId(listing.id)}
+                />
+              )}
+            </div>
           ))
         )}
       </div>
 
-      {selectedListingId && (
+      {selectedListingId && !manageMode && (
         <ListingDetailSheet
           id={selectedListingId}
           onClose={() => setSelectedListingId(null)}
         />
+      )}
+
+      {showAdminPrompt && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end justify-center animate-in fade-in duration-200">
+          <div className="bg-card w-full max-w-[480px] rounded-t-3xl p-6 animate-in slide-in-from-bottom-4 duration-250">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-destructive/10 flex items-center justify-center">
+                  <Trash2 size={16} className="text-destructive" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-foreground text-sm">Enter Admin Password</h2>
+                  <p className="text-xs text-muted-foreground">To enable delete mode on all listings</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowAdminPrompt(false); setAdminPassword(""); setAdminError(false); }}
+                className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <input
+              type="password"
+              value={adminPassword}
+              onChange={(e) => { setAdminPassword(e.target.value); setAdminError(false); }}
+              onKeyDown={(e) => e.key === "Enter" && handleAdminUnlock()}
+              placeholder="Admin password"
+              autoFocus
+              className={`w-full border rounded-xl px-4 py-3 text-sm bg-background outline-none transition mb-2 ${
+                adminError ? "border-destructive" : "border-border focus:border-primary"
+              }`}
+            />
+            {adminError && (
+              <p className="text-xs text-destructive mb-3">❌ Wrong password. Try again.</p>
+            )}
+
+            <button
+              onClick={handleAdminUnlock}
+              className="w-full bg-destructive text-white font-semibold py-3 rounded-xl text-sm mt-2 active:scale-95 transition"
+            >
+              Unlock Delete Mode
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
