@@ -200,7 +200,7 @@ export function Contact() {
 
         <div className="mt-6 text-center pb-4">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} DelhiGhar. All rights reserved.
+            © {new Date().getFullYear()} PG.com. All rights reserved.
           </p>
           <Link href="/privacy" className="text-xs text-primary mt-1 block" data-testid="link-privacy">
             Privacy Policy

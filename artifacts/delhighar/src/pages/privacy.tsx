@@ -1,17 +1,17 @@
 import { Link } from "wouter";
 import { ArrowLeft, Shield } from "lucide-react";
 
-const APP_NAME = "DelhiGhar";
+const APP_NAME = "PG.com";
 const DEVELOPER_EMAIL = "mishra250zxclp@gmail.com";
 const DEVELOPER_PHONE = "+91 96961 49694";
 const EFFECTIVE_DATE = "June 28, 2025";
 
 const sections = [
   {
-    title: "1. About DelhiGhar",
+    title: "1. About PG.com",
     content: [
       `${APP_NAME} is a zero-broker rental property marketplace for Delhi, designed to connect tenants directly with verified property owners. The platform supports Flat, PG, and Hostel listings across Delhi, and provides identity verification, escrow payments, fraud reporting, visit scheduling, and location-based property discovery.`,
-      "By using DelhiGhar, you agree to the terms of this Privacy Policy. If you do not agree, please discontinue use of the app.",
+      "By using PG.com, you agree to the terms of this Privacy Policy. If you do not agree, please discontinue use of the app.",
     ],
   },
   {
@@ -26,7 +26,7 @@ const sections = [
       "**Visit Scheduling:** Name, phone number, and preferred visit date when you schedule a property visit.",
       "**Fraud Reports:** Details you submit when reporting a fraudulent or suspicious listing.",
       "**Usage Data:** Device type, operating system, browser, IP address, pages visited, and feature usage patterns — used to improve app performance.",
-      "**Payment Data:** When using Escrow Pay, payment processing is handled by Razorpay (PCI-DSS compliant). DelhiGhar does not store card, UPI, or bank account details.",
+      "**Payment Data:** When using Escrow Pay, payment processing is handled by Razorpay (PCI-DSS compliant). PG.com does not store card, UPI, or bank account details.",
     ],
   },
   {
@@ -48,11 +48,11 @@ const sections = [
   {
     title: "4. Location Data",
     content: [
-      "DelhiGhar requests access to your device's location (GPS) to show nearby PG, Flat, and Hostel listings on a map and to provide directions from your current location to a listed property.",
+      "PG.com requests access to your device's location (GPS) to show nearby PG, Flat, and Hostel listings on a map and to provide directions from your current location to a listed property.",
       "**Location permission is optional.** The app works without it — the map will show only the property's location without your position.",
       "Your location is processed on-device only. We do not transmit, store, or share your GPS coordinates on our servers.",
       "We use OpenStreetMap (OSM) tiles to render maps. Directions are opened via Google Maps. Please refer to their respective privacy policies for data handling on their platforms.",
-      "You can revoke location permission at any time through your device settings (Settings → Apps → DelhiGhar → Permissions).",
+      "You can revoke location permission at any time through your device settings (Settings → Apps → PG.com → Permissions).",
     ],
   },
   {
@@ -66,7 +66,7 @@ const sections = [
   {
     title: "6. Escrow Payments",
     content: [
-      "Payment processing is powered by Razorpay, a PCI-DSS compliant payment gateway. DelhiGhar does not store full card or bank details on its servers.",
+      "Payment processing is powered by Razorpay, a PCI-DSS compliant payment gateway. PG.com does not store full card or bank details on its servers.",
       "Escrow funds are held securely and released to property owners only after the tenant confirms a satisfactory property visit.",
       "Full refunds are issued if a visit is cancelled before it takes place, or if a fraud report against the property is confirmed valid by our admin team.",
       "For payment disputes, contact us at " + DEVELOPER_EMAIL + " within 7 days of the transaction.",
@@ -133,7 +133,7 @@ const sections = [
   {
     title: "13. Account & Data Deletion",
     content: [
-      "You have the right to delete your DelhiGhar account and all associated personal data at any time.",
+      "You have the right to delete your PG.com account and all associated personal data at any time.",
       "**How to request deletion:**",
       "1. Send an email to **" + DEVELOPER_EMAIL + "** with the subject line: **'Account Deletion Request'**",
       "2. Include your registered email address and full name in the email.",
@@ -146,7 +146,7 @@ const sections = [
   {
     title: "14. Cookies & Tracking",
     content: [
-      "The DelhiGhar web app uses local browser storage (localStorage) to maintain your login session. No cross-site tracking cookies are used.",
+      "The PG.com web app uses local browser storage (localStorage) to maintain your login session. No cross-site tracking cookies are used.",
       "We do not use advertising cookies or tracking pixels.",
       "Third-party services (Razorpay, Firebase) may use their own cookies as governed by their respective privacy policies.",
     ],
@@ -163,7 +163,7 @@ const sections = [
     title: "16. Grievance Officer",
     content: [
       "In accordance with the Information Technology Act, 2000 and IT (Intermediary Guidelines) Rules, the details of the Grievance Officer are:",
-      "**Name:** DelhiGhar Support Team",
+      "**Name:** PG.com Support Team",
       "**Email:** " + DEVELOPER_EMAIL,
       "**Phone:** " + DEVELOPER_PHONE,
       "**Address:** New Delhi, India",
@@ -208,7 +208,7 @@ export function PrivacyPolicy() {
 
       <div className="p-4 space-y-1">
         <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 mb-4 text-sm text-foreground leading-relaxed">
-          At <strong>{APP_NAME}</strong>, your privacy matters deeply. This policy explains exactly what data we collect, why we collect it, how we use it, and what rights you have. By using DelhiGhar — including browsing listings, posting a PG, scheduling visits, or using Escrow Pay — you agree to this policy.
+          At <strong>{APP_NAME}</strong>, your privacy matters deeply. This policy explains exactly what data we collect, why we collect it, how we use it, and what rights you have. By using PG.com — including browsing listings, posting a PG, scheduling visits, or using Escrow Pay — you agree to this policy.
         </div>
 
         {sections.map((section, idx) => (
