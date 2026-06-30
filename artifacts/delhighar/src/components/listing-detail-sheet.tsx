@@ -1,9 +1,10 @@
-import { X, ShieldCheck, BadgeCheck, MapPin, Phone, AlertTriangle, Calendar, CreditCard, ShieldAlert } from "lucide-react";
-import { useGetListing, getGetListingQueryKey, useRevealPhone, useScheduleVisit } from "@workspace/api-client-react";
+import { X, ShieldCheck, MapPin, Phone, AlertTriangle, Calendar, CreditCard, ShieldAlert } from "lucide-react";
+import { useGetListing, getGetListingQueryKey, useRevealPhone } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState, lazy, Suspense } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { ScheduleVisitSheet } from "@/components/schedule-visit-sheet";
 
 const PropertyMap = lazy(() =>
   import("@/components/property-map").then((m) => ({ default: m.PropertyMap }))
@@ -14,11 +15,11 @@ export function ListingDetailSheet({ id, onClose }: { id: string; onClose: () =>
     query: { enabled: !!id, queryKey: getGetListingQueryKey(id) },
   });
   const revealMutation = useRevealPhone();
-  const visitMutation = useScheduleVisit();
   const { toast } = useToast();
 
   const [phoneRevealed, setPhoneRevealed] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [showVisitSheet, setShowVisitSheet] = useState(false);
 
   if (isLoading || !listing) {
     return (
@@ -40,21 +41,6 @@ export function ListingDetailSheet({ id, onClose }: { id: string; onClose: () =>
           setPhoneRevealed(true);
         },
       }
-    );
-  };
-
-  const handleScheduleVisit = () => {
-    visitMutation.mutate(
-      {
-        data: {
-          listingId: id,
-          buyerName: "User",
-          buyerPhone: "9876543210",
-          visitDate: new Date().toISOString(),
-          userId: "user123",
-        },
-      },
-      { onSuccess: () => toast({ title: "Visit Scheduled! 📅" }) }
     );
   };
 
@@ -227,12 +213,11 @@ export function ListingDetailSheet({ id, onClose }: { id: string; onClose: () =>
       <div className="fixed bottom-0 w-full max-w-[480px] bg-background/95 backdrop-blur border-t p-4 space-y-2 z-20">
         <div className="grid grid-cols-2 gap-2">
           <Button
-            onClick={handleScheduleVisit}
+            onClick={() => setShowVisitSheet(true)}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
-            disabled={visitMutation.isPending}
           >
             <Calendar className="w-4 h-4" />
-            {visitMutation.isPending ? "Booking..." : "Schedule Visit"}
+            Schedule Visit
           </Button>
           <Button
             variant={phoneRevealed ? "outline" : "secondary"}
@@ -250,6 +235,14 @@ export function ListingDetailSheet({ id, onClose }: { id: string; onClose: () =>
           </Button>
         )}
       </div>
+
+      {showVisitSheet && (
+        <ScheduleVisitSheet
+          listingId={id}
+          listingName={listing.name}
+          onClose={() => setShowVisitSheet(false)}
+        />
+      )}
     </div>
   );
 }
