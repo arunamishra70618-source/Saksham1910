@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useGetListings, useDeleteListing } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/listing-card";
 import { Input } from "@/components/ui/input";
-import { Search, UserCircle, LogOut, Shield, Phone, Trash2, X, ShieldCheck } from "lucide-react";
+import { Search, UserCircle, LogOut, Shield, Phone, Trash2, X, ShieldCheck, BarChart3 } from "lucide-react";
 import { ListingDetailSheet } from "@/components/listing-detail-sheet";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -139,6 +139,14 @@ export function Home() {
                       </button>
                     )}
 
+                    <Link
+                      href="/owner"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2.5 text-sm text-foreground py-2 px-2 rounded-lg hover:bg-muted transition-colors w-full"
+                    >
+                      <BarChart3 size={15} className="text-primary" />
+                      Owner Dashboard
+                    </Link>
                     <Link
                       href="/privacy"
                       onClick={() => setShowUserMenu(false)}

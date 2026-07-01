@@ -13,12 +13,13 @@ import { Login } from "@/pages/login";
 import { ForgotPassword } from "@/pages/forgot-password";
 import { PrivacyPolicy } from "@/pages/privacy";
 import { Contact } from "@/pages/contact";
+import { OwnerDashboard } from "@/pages/owner-dashboard";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
 const PUBLIC_ROUTES = ["/login", "/forgot-password", "/privacy", "/contact"];
-const NO_NAV_ROUTES = ["/login", "/forgot-password", "/privacy", "/contact", "/admin"];
+const NO_NAV_ROUTES = ["/login", "/forgot-password", "/privacy", "/contact", "/admin", "/owner"];
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useAuth();
@@ -44,6 +45,7 @@ function Router() {
           <Route path="/safety" component={Safety} />
           <Route path="/list" component={ListProperty} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/owner" component={OwnerDashboard} />
           <Route component={NotFound} />
         </Switch>
       </AuthGuard>

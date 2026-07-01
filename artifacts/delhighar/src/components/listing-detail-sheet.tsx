@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState, lazy, Suspense } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ScheduleVisitSheet } from "@/components/schedule-visit-sheet";
+import { ReviewsSection } from "@/components/reviews-section";
 
 const PropertyMap = lazy(() =>
   import("@/components/property-map").then((m) => ({ default: m.PropertyMap }))
@@ -193,6 +194,9 @@ export function ListingDetailSheet({ id, onClose }: { id: string; onClose: () =>
               </div>
             </div>
           </div>
+
+          {/* Reviews */}
+          <ReviewsSection listingId={id} hasVisited={true} />
 
           {/* Safety Tips */}
           <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 text-sm">

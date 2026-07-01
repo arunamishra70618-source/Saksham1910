@@ -188,6 +188,58 @@ export interface AadhaarVerifyInput {
   password: string;
 }
 
+export interface Review {
+  id: string;
+  listingId: string;
+  reviewerId: string;
+  reviewerName: string;
+  rating: number;
+  comment: string;
+  /** @nullable */
+  ownerReply?: string | null;
+  createdAt: string;
+}
+
+export interface ReviewInput {
+  listingId: string;
+  reviewerId: string;
+  reviewerName: string;
+  rating: number;
+  comment: string;
+}
+
+export interface ReviewReplyInput {
+  ownerReply: string;
+}
+
+export interface OwnerListingStat {
+  id: string;
+  name: string;
+  area: string;
+  type: string;
+  rent: number;
+  isHidden: boolean;
+  verificationStatus: string;
+  visitCount: number;
+  pendingVisits: number;
+  confirmedVisits: number;
+  reviewCount: number;
+  rating: number;
+  fraudReportCount: number;
+  createdAt: string;
+}
+
+export interface OwnerDashboard {
+  totalListings: number;
+  activeListings: number;
+  totalViews: number;
+  totalVisits: number;
+  pendingVisits: number;
+  confirmedVisits: number;
+  avgRating: number;
+  listings: OwnerListingStat[];
+}
+
 export type GetListingsParams = {
 type?: string;
 gender?: string;

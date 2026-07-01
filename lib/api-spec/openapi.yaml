@@ -19,6 +19,10 @@ tags:
     description: Fraud report operations
   - name: admin
     description: Admin operations
+  - name: reviews
+    description: Property reviews and ratings
+  - name: owner
+    description: Owner dashboard
 
 paths:
   /healthz:
@@ -412,6 +416,92 @@ paths:
                   $ref: "#/components/schemas/Listing"
         "401":
           description: Unauthorized
+
+  /reviews/{listingId}:
+    get:
+      operationId: getReviews
+      tags: [reviews]
+      summary: Get all reviews for a listing
+      parameters:
+        - in: path
+          name: listingId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+
+  /reviews:
+    post:
+      operationId: submitReview
+      tags: [reviews]
+      summary: Submit a review for a listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "409":
+          description: Already reviewed
+
+  /reviews/{id}/reply:
+    patch:
+      operationId: replyToReview
+      tags: [reviews]
+      summary: Owner reply to a review
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewReplyInput"
+      responses:
+        "200":
+          description: Reply posted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+
+  /owner/dashboard/{phone}:
+    get:
+      operationId: getOwnerDashboard
+      tags: [owner]
+      summary: Get owner dashboard stats
+      parameters:
+        - in: path
+          name: phone
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Owner dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnerDashboard"
 
   /admin/listings/{id}/verify-aadhaar:
     post:
@@ -847,3 +937,102 @@ components:
           type: string
         password:
           type: string
+
+    Review:
+      type: object
+      required: [id, listingId, reviewerId, reviewerName, rating, comment, createdAt]
+      properties:
+        id:
+          type: string
+        listingId:
+          type: string
+        reviewerId:
+          type: string
+        reviewerName:
+          type: string
+        rating:
+          type: integer
+        comment:
+          type: string
+        ownerReply:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ReviewInput:
+      type: object
+      required: [listingId, reviewerId, reviewerName, rating, comment]
+      properties:
+        listingId:
+          type: string
+        reviewerId:
+          type: string
+        reviewerName:
+          type: string
+        rating:
+          type: integer
+        comment:
+          type: string
+
+    ReviewReplyInput:
+      type: object
+      required: [ownerReply]
+      properties:
+        ownerReply:
+          type: string
+
+    OwnerListingStat:
+      type: object
+      required: [id, name, area, type, rent, isHidden, verificationStatus, visitCount, pendingVisits, confirmedVisits, reviewCount, rating, fraudReportCount, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        area:
+          type: string
+        type:
+          type: string
+        rent:
+          type: integer
+        isHidden:
+          type: boolean
+        verificationStatus:
+          type: string
+        visitCount:
+          type: integer
+        pendingVisits:
+          type: integer
+        confirmedVisits:
+          type: integer
+        reviewCount:
+          type: integer
+        rating:
+          type: number
+        fraudReportCount:
+          type: integer
+        createdAt:
+          type: string
+
+    OwnerDashboard:
+      type: object
+      required: [totalListings, activeListings, totalViews, totalVisits, pendingVisits, confirmedVisits, avgRating, listings]
+      properties:
+        totalListings:
+          type: integer
+        activeListings:
+          type: integer
+        totalViews:
+          type: integer
+        totalVisits:
+          type: integer
+        pendingVisits:
+          type: integer
+        confirmedVisits:
+          type: integer
+        avgRating:
+          type: number
+        listings:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerListingStat"

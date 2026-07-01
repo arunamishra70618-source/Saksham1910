@@ -557,6 +557,106 @@ export const GetAdminListingsResponse = zod.array(GetAdminListingsResponseItem)
 
 
 /**
+ * @summary Get all reviews for a listing
+ */
+export const GetReviewsParams = zod.object({
+  "listingId": zod.coerce.string()
+})
+
+export const GetReviewsResponseItem = zod.object({
+  "id": zod.string(),
+  "listingId": zod.string(),
+  "reviewerId": zod.string(),
+  "reviewerName": zod.string(),
+  "rating": zod.number(),
+  "comment": zod.string(),
+  "ownerReply": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const GetReviewsResponse = zod.array(GetReviewsResponseItem)
+
+
+/**
+ * @summary Submit a review for a listing
+ */
+export const SubmitReviewBody = zod.object({
+  "listingId": zod.string(),
+  "reviewerId": zod.string(),
+  "reviewerName": zod.string(),
+  "rating": zod.number(),
+  "comment": zod.string()
+})
+
+export const SubmitReviewResponse = zod.object({
+  "id": zod.string(),
+  "listingId": zod.string(),
+  "reviewerId": zod.string(),
+  "reviewerName": zod.string(),
+  "rating": zod.number(),
+  "comment": zod.string(),
+  "ownerReply": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Owner reply to a review
+ */
+export const ReplyToReviewParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const ReplyToReviewBody = zod.object({
+  "ownerReply": zod.string()
+})
+
+export const ReplyToReviewResponse = zod.object({
+  "id": zod.string(),
+  "listingId": zod.string(),
+  "reviewerId": zod.string(),
+  "reviewerName": zod.string(),
+  "rating": zod.number(),
+  "comment": zod.string(),
+  "ownerReply": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get owner dashboard stats
+ */
+export const GetOwnerDashboardParams = zod.object({
+  "phone": zod.coerce.string()
+})
+
+export const GetOwnerDashboardResponse = zod.object({
+  "totalListings": zod.number(),
+  "activeListings": zod.number(),
+  "totalViews": zod.number(),
+  "totalVisits": zod.number(),
+  "pendingVisits": zod.number(),
+  "confirmedVisits": zod.number(),
+  "avgRating": zod.number(),
+  "listings": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "area": zod.string(),
+  "type": zod.string(),
+  "rent": zod.number(),
+  "isHidden": zod.boolean(),
+  "verificationStatus": zod.string(),
+  "visitCount": zod.number(),
+  "pendingVisits": zod.number(),
+  "confirmedVisits": zod.number(),
+  "reviewCount": zod.number(),
+  "rating": zod.number(),
+  "fraudReportCount": zod.number(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
  * @summary Approve or reject Aadhaar verification
  */
 export const VerifyAadhaarParams = zod.object({
