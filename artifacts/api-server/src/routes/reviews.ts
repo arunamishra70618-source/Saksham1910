@@ -1,13 +1,15 @@
 import { Router } from "express";
 import { eq, and, avg, count } from "drizzle-orm";
-import { db, reviewsTable, visitsTable, listingsTable } from "@workspace/db";
+import { db, reviewsTable, listingsTable } from "@workspace/db";
 import { randomUUID } from "crypto";
+import { writeLimiter, strictLimiter } from "../lib/rate-limit";
+import { sanitizeString } from "../lib/sanitize";
 
 const router = Router();
 
 router.get("/:listingId", async (req, res) => {
   try {
-    const { listingId } = req.params;
+    const listingId = req.params["listingId"] as string;
     const reviews = await db
       .select()
       .from(reviewsTable)
@@ -21,24 +23,34 @@ router.get("/:listingId", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", writeLimiter, async (req, res) => {
   try {
     const { listingId, reviewerId, reviewerName, rating, comment } = req.body;
 
-    if (!listingId || !reviewerId || !reviewerName || !rating || !comment) {
-      return void res.status(400).json({ error: "Missing required fields" });
+    if (!listingId || !reviewerId || !reviewerName) {
+      return void res.status(400).json({ error: "listingId, reviewerId, and reviewerName are required" });
     }
-    if (rating < 1 || rating > 5) {
-      return void res.status(400).json({ error: "Rating must be 1-5" });
+
+    const safeRating = parseInt(String(rating), 10);
+    if (!safeRating || safeRating < 1 || safeRating > 5) {
+      return void res.status(400).json({ error: "Rating must be 1–5" });
     }
-    if (comment.length > 200) {
-      return void res.status(400).json({ error: "Comment too long" });
+
+    const safeComment = sanitizeString(comment, 200);
+    if (safeComment.length < 10) {
+      return void res.status(400).json({ error: "Comment must be at least 10 characters" });
     }
+
+    const safeListingId = sanitizeString(listingId, 50);
+    const safeReviewerId = sanitizeString(reviewerId, 150);
+
+    const listing = await db.select().from(listingsTable).where(eq(listingsTable.id, safeListingId));
+    if (!listing.length) return void res.status(404).json({ error: "Listing not found" });
 
     const existing = await db
       .select()
       .from(reviewsTable)
-      .where(and(eq(reviewsTable.listingId, listingId), eq(reviewsTable.reviewerId, reviewerId)));
+      .where(and(eq(reviewsTable.listingId, safeListingId), eq(reviewsTable.reviewerId, safeReviewerId)));
 
     if (existing.length > 0) {
       return void res.status(409).json({ error: "You have already reviewed this property" });
@@ -46,13 +58,20 @@ router.post("/", async (req, res) => {
 
     const [review] = await db
       .insert(reviewsTable)
-      .values({ id: randomUUID(), listingId, reviewerId, reviewerName, rating, comment })
+      .values({
+        id: randomUUID(),
+        listingId: safeListingId,
+        reviewerId: safeReviewerId,
+        reviewerName: sanitizeString(reviewerName, 100),
+        rating: safeRating,
+        comment: safeComment,
+      })
       .returning();
 
     const [stats] = await db
       .select({ avg: avg(reviewsTable.rating), cnt: count() })
       .from(reviewsTable)
-      .where(eq(reviewsTable.listingId, listingId));
+      .where(eq(reviewsTable.listingId, safeListingId));
 
     await db
       .update(listingsTable)
@@ -60,7 +79,7 @@ router.post("/", async (req, res) => {
         rating: Math.round(Number(stats.avg) * 10) / 10,
         reviewCount: Number(stats.cnt),
       })
-      .where(eq(listingsTable.id, listingId));
+      .where(eq(listingsTable.id, safeListingId));
 
     res.status(201).json({ ...review, createdAt: review.createdAt.toISOString() });
   } catch (err) {
@@ -69,15 +88,17 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.patch("/:id/reply", async (req, res) => {
+router.patch("/:id/reply", strictLimiter, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     const { ownerReply } = req.body;
-    if (!ownerReply) return void res.status(400).json({ error: "Reply text required" });
+
+    const safeReply = sanitizeString(ownerReply, 300);
+    if (!safeReply) return void res.status(400).json({ error: "Reply text required" });
 
     const [review] = await db
       .update(reviewsTable)
-      .set({ ownerReply })
+      .set({ ownerReply: safeReply })
       .where(eq(reviewsTable.id, id))
       .returning();
 

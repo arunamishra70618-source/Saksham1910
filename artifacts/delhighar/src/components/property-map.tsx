@@ -21,15 +21,15 @@ export function PropertyMap({ lat, lng, name, area }: PropertyMapProps) {
   useEffect(() => {
     if (!pgLat || !pgLng) return;
 
-    let map: any = null;
+    let destroyed = false;
 
     const initMap = async () => {
       const L = (await import("leaflet")).default;
       await import("leaflet/dist/leaflet.css");
 
-      if (!mapRef.current || mapInstanceRef.current) return;
+      if (destroyed || !mapRef.current || mapInstanceRef.current) return;
 
-      map = L.map(mapRef.current, { zoomControl: true, attributionControl: false }).setView(
+      const map = L.map(mapRef.current, { zoomControl: true, attributionControl: false }).setView(
         [pgLat, pgLng],
         15
       );
@@ -59,13 +59,16 @@ export function PropertyMap({ lat, lng, name, area }: PropertyMapProps) {
         .openPopup();
 
       mapInstanceRef.current = map;
-      setMapLoaded(true);
+      if (!destroyed) setMapLoaded(true);
 
       navigator.geolocation?.getCurrentPosition(
         (pos) => {
+          if (destroyed || !mapInstanceRef.current) return;
+
           const userLat = pos.coords.latitude;
           const userLng = pos.coords.longitude;
-          setUserLocation({ lat: userLat, lng: userLng });
+
+          if (!destroyed) setUserLocation({ lat: userLat, lng: userLng });
 
           const userIcon = L.divIcon({
             html: `<div style="background:#1A2340;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>`,
@@ -74,18 +77,19 @@ export function PropertyMap({ lat, lng, name, area }: PropertyMapProps) {
             iconAnchor: [8, 8],
           });
 
-          L.marker([userLat, userLng], { icon: userIcon })
-            .addTo(map)
-            .bindPopup("<strong>You are here</strong>");
+          try {
+            L.marker([userLat, userLng], { icon: userIcon })
+              .addTo(mapInstanceRef.current)
+              .bindPopup("<strong>You are here</strong>");
 
-          const bounds = L.latLngBounds(
-            [pgLat, pgLng],
-            [userLat, userLng]
-          );
-          map.fitBounds(bounds, { padding: [40, 40] });
+            const bounds = L.latLngBounds([pgLat, pgLng], [userLat, userLng]);
+            mapInstanceRef.current.fitBounds(bounds, { padding: [40, 40] });
+          } catch {
+            // map may have been removed between check and addTo
+          }
         },
         () => {
-          setLocationError(true);
+          if (!destroyed) setLocationError(true);
         },
         { enableHighAccuracy: true, timeout: 8000 }
       );
@@ -94,6 +98,7 @@ export function PropertyMap({ lat, lng, name, area }: PropertyMapProps) {
     initMap();
 
     return () => {
+      destroyed = true;
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;

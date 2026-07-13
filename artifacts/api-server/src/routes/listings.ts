@@ -1,8 +1,13 @@
 import { Router } from "express";
-import { eq, and, gte, lte, ilike, or } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db, listingsTable, savedListingsTable } from "@workspace/db";
-import { logger } from "../lib/logger";
 import { randomUUID } from "crypto";
+import { strictLimiter, writeLimiter } from "../lib/rate-limit";
+import { sanitizeString, sanitizePhone, sanitizeInt, sanitizeArray } from "../lib/sanitize";
+
+const ALLOWED_TYPES = ["PG", "Flat", "Hostel"];
+const ALLOWED_GENDERS = ["Boys", "Girls", "Co-ed", "Any", "Mixed"];
+const ALLOWED_ROOM_TYPES = ["Private", "Shared", "Triple"];
 
 const router = Router();
 
@@ -12,23 +17,23 @@ router.get("/", async (req, res) => {
 
     let listings = await db.select().from(listingsTable).where(eq(listingsTable.isHidden, false));
 
-    if (type && type !== "Sab") {
+    if (type && type !== "Sab" && ALLOWED_TYPES.includes(type)) {
       listings = listings.filter((l) => l.type === type);
     }
-    if (gender && gender !== "Sab") {
+    if (gender && gender !== "Sab" && ALLOWED_GENDERS.includes(gender)) {
       listings = listings.filter((l) => l.gender === gender);
     }
     if (budgetMin) {
-      listings = listings.filter((l) => l.rent >= parseInt(budgetMin));
+      listings = listings.filter((l) => l.rent >= sanitizeInt(budgetMin, 0, 999999));
     }
     if (budgetMax) {
-      listings = listings.filter((l) => l.rent <= parseInt(budgetMax));
+      listings = listings.filter((l) => l.rent <= sanitizeInt(budgetMax, 0, 999999));
     }
     if (verifiedOnly === "true") {
       listings = listings.filter((l) => l.verificationStatus === "aadhaar_verified");
     }
     if (search) {
-      const q = search.toLowerCase();
+      const q = sanitizeString(search, 100).toLowerCase();
       listings = listings.filter(
         (l) =>
           l.area.toLowerCase().includes(q) ||
@@ -44,9 +49,23 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", writeLimiter, async (req, res) => {
   try {
     const body = req.body;
+
+    const name = sanitizeString(body.name, 150);
+    const type = ALLOWED_TYPES.includes(body.type) ? body.type : null;
+    const gender = ALLOWED_GENDERS.includes(body.gender) ? body.gender : null;
+    const area = sanitizeString(body.area, 100);
+    const ownerPhone = sanitizePhone(body.ownerPhone);
+
+    if (!name || !type || !gender || !area || ownerPhone.length < 10) {
+      return void res.status(400).json({ error: "Missing or invalid required fields" });
+    }
+
+    const rent = sanitizeInt(body.rent, 500, 200000);
+    const deposit = sanitizeInt(body.deposit, 0, 1000000);
+
     const id = randomUUID();
     const verificationStatus = body.aadhaarConsent ? "aadhaar_pending" : "phone_verified";
 
@@ -54,30 +73,30 @@ router.post("/", async (req, res) => {
       .insert(listingsTable)
       .values({
         id,
-        name: body.name,
-        type: body.type,
-        gender: body.gender,
-        area: body.area,
-        gali: body.gali,
-        landmark: body.landmark,
-        mapsLink: body.mapsLink || null,
-        rent: body.rent,
-        deposit: body.deposit,
-        roomType: body.roomType,
-        ownerName: body.ownerName,
-        ownerPhone: body.ownerPhone,
-        alternatePhone: body.alternatePhone || null,
+        name,
+        type,
+        gender,
+        area,
+        gali: sanitizeString(body.gali, 200),
+        landmark: sanitizeString(body.landmark, 200),
+        mapsLink: body.mapsLink ? sanitizeString(body.mapsLink, 500) : null,
+        rent,
+        deposit,
+        roomType: ALLOWED_ROOM_TYPES.includes(body.roomType) ? body.roomType : "Private",
+        ownerName: sanitizeString(body.ownerName, 100),
+        ownerPhone,
+        alternatePhone: body.alternatePhone ? sanitizePhone(body.alternatePhone) : null,
         verificationStatus,
-        aadhaarImageUrl: body.aadhaarImageUrl || null,
-        escrowEnabled: body.escrowEnabled ?? false,
-        amenities: body.amenities || [],
-        securityFeatures: body.securityFeatures || [],
-        curfewTime: body.curfewTime || "No Curfew",
-        guestPolicy: body.guestPolicy || "Open",
-        smokingAllowed: body.smokingAllowed ?? false,
-        alcoholAllowed: body.alcoholAllowed ?? false,
-        nonVegAllowed: body.nonVegAllowed ?? true,
-        photos: body.photos || [],
+        aadhaarImageUrl: body.aadhaarImageUrl ? sanitizeString(body.aadhaarImageUrl, 500) : null,
+        escrowEnabled: Boolean(body.escrowEnabled),
+        amenities: sanitizeArray(body.amenities),
+        securityFeatures: sanitizeArray(body.securityFeatures),
+        curfewTime: sanitizeString(body.curfewTime, 50) || "No Curfew",
+        guestPolicy: sanitizeString(body.guestPolicy, 50) || "Open",
+        smokingAllowed: Boolean(body.smokingAllowed),
+        alcoholAllowed: Boolean(body.alcoholAllowed),
+        nonVegAllowed: body.nonVegAllowed !== false,
+        photos: sanitizeArray(body.photos, 10, 500),
       })
       .returning();
 
@@ -115,7 +134,8 @@ router.get("/saved", async (req, res) => {
     const { userId } = req.query as { userId: string };
     if (!userId) return void res.status(400).json({ error: "userId required" });
 
-    const saved = await db.select().from(savedListingsTable).where(eq(savedListingsTable.userId, userId));
+    const safeUserId = sanitizeString(userId, 100);
+    const saved = await db.select().from(savedListingsTable).where(eq(savedListingsTable.userId, safeUserId));
     const listingIds = saved.map((s) => s.listingId);
 
     if (listingIds.length === 0) return void res.json([]);
@@ -132,7 +152,7 @@ router.get("/saved", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, id));
     if (!listing) return void res.status(404).json({ error: "Not found" });
     res.json(formatListing(listing));
@@ -144,15 +164,15 @@ router.get("/:id", async (req, res) => {
 
 router.patch("/:id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     const body = req.body;
     const updateData: Partial<typeof listingsTable.$inferInsert> = {};
-    if (body.name !== undefined) updateData.name = body.name;
-    if (body.rent !== undefined) updateData.rent = body.rent;
-    if (body.deposit !== undefined) updateData.deposit = body.deposit;
-    if (body.verificationStatus !== undefined) updateData.verificationStatus = body.verificationStatus;
-    if (body.isHidden !== undefined) updateData.isHidden = body.isHidden;
-    if (body.fraudReportCount !== undefined) updateData.fraudReportCount = body.fraudReportCount;
+    if (body.name !== undefined) updateData.name = sanitizeString(body.name, 150);
+    if (body.rent !== undefined) updateData.rent = sanitizeInt(body.rent, 500, 200000);
+    if (body.deposit !== undefined) updateData.deposit = sanitizeInt(body.deposit, 0, 1000000);
+    if (body.verificationStatus !== undefined) updateData.verificationStatus = sanitizeString(body.verificationStatus, 50);
+    if (body.isHidden !== undefined) updateData.isHidden = Boolean(body.isHidden);
+    if (body.fraudReportCount !== undefined) updateData.fraudReportCount = sanitizeInt(body.fraudReportCount, 0, 9999);
 
     const [updated] = await db.update(listingsTable).set(updateData).where(eq(listingsTable.id, id)).returning();
     if (!updated) return void res.status(404).json({ error: "Not found" });
@@ -165,7 +185,7 @@ router.patch("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     await db.delete(listingsTable).where(eq(listingsTable.id, id));
     res.status(204).send();
   } catch (err) {
@@ -174,24 +194,26 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.post("/:id/save", async (req, res) => {
+router.post("/:id/save", writeLimiter, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     const { userId, action } = req.body;
     if (!userId) return void res.status(400).json({ error: "userId required" });
+
+    const safeUserId = sanitizeString(userId, 100);
 
     const existing = await db
       .select()
       .from(savedListingsTable)
-      .where(and(eq(savedListingsTable.userId, userId), eq(savedListingsTable.listingId, id)));
+      .where(and(eq(savedListingsTable.userId, safeUserId), eq(savedListingsTable.listingId, id)));
 
     if (action === "save" && existing.length === 0) {
-      await db.insert(savedListingsTable).values({ id: randomUUID(), userId, listingId: id });
+      await db.insert(savedListingsTable).values({ id: randomUUID(), userId: safeUserId, listingId: id });
       return void res.json({ saved: true });
     } else if (action === "unsave" && existing.length > 0) {
       await db
         .delete(savedListingsTable)
-        .where(and(eq(savedListingsTable.userId, userId), eq(savedListingsTable.listingId, id)));
+        .where(and(eq(savedListingsTable.userId, safeUserId), eq(savedListingsTable.listingId, id)));
       return void res.json({ saved: false });
     }
 
@@ -202,9 +224,9 @@ router.post("/:id/save", async (req, res) => {
   }
 });
 
-router.post("/:id/reveal-phone", async (req, res) => {
+router.post("/:id/reveal-phone", strictLimiter, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, id));
     if (!listing) return void res.status(404).json({ error: "Not found" });
     res.json({ phone: listing.ownerPhone, alternatePhone: listing.alternatePhone });
