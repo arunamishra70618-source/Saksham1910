@@ -5,6 +5,7 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { generalLimiter } from "./lib/rate-limit";
+import { firewallMiddleware } from "./lib/firewall";
 
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
   .split(",")
@@ -61,6 +62,7 @@ app.use(express.json({ limit: "512kb" }));
 app.use(express.urlencoded({ extended: true, limit: "512kb" }));
 
 app.use("/api", generalLimiter);
+app.use("/api", firewallMiddleware);
 
 app.use("/api", router);
 

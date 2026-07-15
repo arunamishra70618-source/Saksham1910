@@ -397,11 +397,6 @@ paths:
       summary: Get all listings for admin review
       parameters:
         - in: query
-          name: password
-          required: true
-          schema:
-            type: string
-        - in: query
           name: status
           schema:
             type: string
@@ -931,11 +926,9 @@ components:
 
     AadhaarVerifyInput:
       type: object
-      required: [action, password]
+      required: [action]
       properties:
         action:
-          type: string
-        password:
           type: string
 
     Review:

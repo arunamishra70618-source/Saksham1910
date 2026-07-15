@@ -514,7 +514,6 @@ export const GetReportsResponse = zod.array(GetReportsResponseItem)
  * @summary Get all listings for admin review
  */
 export const GetAdminListingsQueryParams = zod.object({
-  "password": zod.coerce.string(),
   "status": zod.coerce.string().optional()
 })
 
@@ -664,8 +663,7 @@ export const VerifyAadhaarParams = zod.object({
 })
 
 export const VerifyAadhaarBody = zod.object({
-  "action": zod.string(),
-  "password": zod.string()
+  "action": zod.string()
 })
 
 export const VerifyAadhaarResponse = zod.object({

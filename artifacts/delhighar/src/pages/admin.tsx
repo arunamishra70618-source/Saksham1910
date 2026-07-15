@@ -1,37 +1,81 @@
 import { useState } from "react";
-import { useGetAdminListings, useVerifyAadhaar, useDeleteListing } from "@workspace/api-client-react";
+import {
+  useGetAdminListings,
+  useVerifyAadhaar,
+  useDeleteListing,
+  getAdminListings,
+} from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, ShieldCheck, ShieldX, AlertTriangle, X, CheckCircle2 } from "lucide-react";
+import { Trash2, ShieldCheck, ShieldX, AlertTriangle, Lock, CheckCircle2, Loader2 } from "lucide-react";
 
 export function AdminPanel() {
   const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
   const [activeTab, setActiveTab] = useState<"pending" | "all">("pending");
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "admin123") {
-      setIsAuthenticated(true);
-    } else {
-      toast({ title: "Invalid password", variant: "destructive" });
+    if (!password.trim()) return;
+
+    setIsLoading(true);
+    setLoginError("");
+
+    try {
+      await getAdminListings(
+        { status: "pending_aadhaar" },
+        { headers: { "x-admin-token": password } }
+      );
+      setToken(password);
+      setPassword("");
+    } catch (err: any) {
+      if (err?.status === 401) {
+        setLoginError("Wrong password. Try again.");
+      } else if (err?.status === 429) {
+        setLoginError("Too many attempts. Please wait 30 minutes.");
+      } else {
+        setLoginError("Could not connect to server. Try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (!isAuthenticated) {
+  if (!token) {
     return (
       <div className="flex flex-col h-screen bg-background items-center justify-center p-6 animate-in fade-in duration-300">
         <div className="w-full max-w-sm bg-card p-6 rounded-2xl border shadow-lg">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <ShieldCheck size={28} className="text-primary" />
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Lock size={26} className="text-primary" />
             <h1 className="text-xl font-bold">Admin Access</h1>
           </div>
+          <p className="text-xs text-muted-foreground text-center mb-6">Secure server-verified login</p>
           <form onSubmit={handleLogin} className="space-y-4">
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter admin password" className="text-center tracking-widest" />
-            <Button type="submit" className="w-full">Login</Button>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setLoginError(""); }}
+              placeholder="Enter admin password"
+              className="text-center tracking-widest"
+              disabled={isLoading}
+              autoComplete="current-password"
+            />
+            {loginError && (
+              <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg animate-in fade-in duration-200">
+                <AlertTriangle size={13} />
+                {loginError}
+              </div>
+            )}
+            <Button type="submit" className="w-full" disabled={isLoading || !password.trim()}>
+              {isLoading ? (
+                <><Loader2 size={16} className="animate-spin mr-2" />Verifying...</>
+              ) : "Login"}
+            </Button>
           </form>
         </div>
       </div>
@@ -41,7 +85,15 @@ export function AdminPanel() {
   return (
     <div className="flex flex-col h-full bg-background min-h-[100dvh] animate-in fade-in duration-300">
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b p-4">
-        <h1 className="text-xl font-bold mb-3">Admin Dashboard</h1>
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-xl font-bold">Admin Dashboard</h1>
+          <button
+            onClick={() => setToken(null)}
+            className="text-xs text-muted-foreground border rounded-lg px-2.5 py-1.5 hover:bg-muted transition-colors"
+          >
+            Logout
+          </button>
+        </div>
         <div className="flex gap-2">
           <Button
             variant={activeTab === "pending" ? "default" : "outline"}
@@ -63,51 +115,77 @@ export function AdminPanel() {
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto">
-        <AdminListings password={password} tab={activeTab} />
+        <AdminListings token={token} tab={activeTab} onUnauth={() => setToken(null)} />
       </div>
     </div>
   );
 }
 
-function AdminListings({ password, tab }: { password: string; tab: string }) {
+function AdminListings({
+  token,
+  tab,
+  onUnauth,
+}: {
+  token: string;
+  tab: string;
+  onUnauth: () => void;
+}) {
   const statusFilter = tab === "pending" ? "aadhaar_pending" : undefined;
-  const { data: listings, isLoading, refetch } = useGetAdminListings({ password, status: statusFilter });
-  const verifyMutation = useVerifyAadhaar();
-  const deleteMutation = useDeleteListing();
+  const requestOptions = { headers: { "x-admin-token": token } };
+
+  const { data: listings, isLoading, refetch } = useGetAdminListings(
+    { status: statusFilter },
+    { request: requestOptions }
+  );
+
+  const verifyMutation = useVerifyAadhaar({ request: requestOptions });
+  const deleteMutation = useDeleteListing({ request: requestOptions });
   const { toast } = useToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
 
   const handleVerify = (id: string, action: "approve" | "reject") => {
-    verifyMutation.mutate({ id, data: { password, action } }, {
-      onSuccess: () => {
-        toast({ title: action === "approve" ? "✅ Listing approved" : "❌ Listing rejected" });
-        refetch();
+    verifyMutation.mutate(
+      { id, data: { action } },
+      {
+        onSuccess: () => {
+          toast({ title: action === "approve" ? "✅ Listing approved" : "❌ Listing rejected" });
+          refetch();
+        },
+        onError: (err: any) => {
+          if (err?.status === 401) onUnauth();
+        },
       }
-    });
+    );
   };
 
   const handleDeleteConfirm = (id: string) => {
-    deleteMutation.mutate({ id }, {
-      onSuccess: () => {
-        setDeletedIds(prev => new Set([...prev, id]));
-        setDeletingId(null);
-        toast({ title: "🗑️ Listing deleted successfully" });
-        setTimeout(() => refetch(), 500);
-      },
-      onError: () => {
-        toast({ title: "Failed to delete listing", variant: "destructive" });
-        setDeletingId(null);
+    deleteMutation.mutate(
+      { id },
+      {
+        onSuccess: () => {
+          setDeletedIds((prev) => new Set([...prev, id]));
+          setDeletingId(null);
+          toast({ title: "🗑️ Listing deleted successfully" });
+          setTimeout(() => refetch(), 500);
+        },
+        onError: (err: any) => {
+          if (err?.status === 401) { onUnauth(); return; }
+          toast({ title: "Failed to delete listing", variant: "destructive" });
+          setDeletingId(null);
+        },
       }
-    });
+    );
   };
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {Array(3).fill(0).map((_, i) => (
-          <div key={i} className="h-36 bg-card rounded-2xl animate-pulse border border-border" />
-        ))}
+        {Array(3)
+          .fill(0)
+          .map((_, i) => (
+            <div key={i} className="h-36 bg-card rounded-2xl animate-pulse border border-border" />
+          ))}
       </div>
     );
   }
@@ -121,7 +199,7 @@ function AdminListings({ password, tab }: { password: string; tab: string }) {
     );
   }
 
-  const visibleListings = listings.filter(l => !deletedIds.has(l.id));
+  const visibleListings = listings.filter((l) => !deletedIds.has(l.id));
 
   return (
     <div className="space-y-4 pb-20">
@@ -140,7 +218,9 @@ function AdminListings({ password, tab }: { password: string; tab: string }) {
               <p className="text-xs text-muted-foreground mb-1">
                 <strong className="text-foreground">{listing.name}</strong> — {listing.area}
               </p>
-              <p className="text-xs text-muted-foreground mb-4">This action cannot be undone. The listing will be permanently removed.</p>
+              <p className="text-xs text-muted-foreground mb-4">
+                This action cannot be undone. The listing will be permanently removed.
+              </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleDeleteConfirm(listing.id)}
@@ -193,12 +273,25 @@ function AdminListings({ password, tab }: { password: string; tab: string }) {
               </div>
 
               <div className="mt-3 text-xs grid grid-cols-2 gap-2 bg-muted/60 p-3 rounded-xl">
-                <div><span className="text-muted-foreground">Owner:</span> <span className="font-medium">{listing.ownerName || "—"}</span></div>
-                <div><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{listing.ownerPhone || "—"}</span></div>
-                <div><span className="text-muted-foreground">Rent:</span> <span className="font-medium">₹{listing.rent?.toLocaleString()}/mo</span></div>
+                <div>
+                  <span className="text-muted-foreground">Owner:</span>{" "}
+                  <span className="font-medium">{listing.ownerName || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Phone:</span>{" "}
+                  <span className="font-medium">{listing.ownerPhone || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Rent:</span>{" "}
+                  <span className="font-medium">₹{listing.rent?.toLocaleString()}/mo</span>
+                </div>
                 <div>
                   <span className="text-muted-foreground">Reports:</span>{" "}
-                  <span className={`font-bold ${listing.fraudReportCount > 0 ? "text-destructive" : "text-success"}`}>
+                  <span
+                    className={`font-bold ${
+                      listing.fraudReportCount > 0 ? "text-destructive" : "text-success"
+                    }`}
+                  >
                     {listing.fraudReportCount > 0 ? `⚠️ ${listing.fraudReportCount}` : "0"}
                   </span>
                 </div>
@@ -207,7 +300,8 @@ function AdminListings({ password, tab }: { password: string; tab: string }) {
               {listing.fraudReportCount > 0 && (
                 <div className="mt-2 flex items-center gap-2 text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
                   <AlertTriangle size={13} />
-                  {listing.fraudReportCount} fraud report{listing.fraudReportCount > 1 ? "s" : ""} — review immediately
+                  {listing.fraudReportCount} fraud report{listing.fraudReportCount > 1 ? "s" : ""} —
+                  review immediately
                 </div>
               )}
 

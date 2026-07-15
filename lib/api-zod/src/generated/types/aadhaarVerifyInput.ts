@@ -8,5 +8,4 @@
 
 export interface AadhaarVerifyInput {
   action: string;
-  password: string;
 }

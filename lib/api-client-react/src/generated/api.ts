@@ -1394,7 +1394,7 @@ export function useGetReports<TData = Awaited<ReturnType<typeof getReports>>, TE
 
 
 
-export const getGetAdminListingsUrl = (params: GetAdminListingsParams,) => {
+export const getGetAdminListingsUrl = (params?: GetAdminListingsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -1412,7 +1412,7 @@ export const getGetAdminListingsUrl = (params: GetAdminListingsParams,) => {
 /**
  * @summary Get all listings for admin review
  */
-export const getAdminListings = async (params: GetAdminListingsParams, options?: RequestInit): Promise<Listing[]> => {
+export const getAdminListings = async (params?: GetAdminListingsParams, options?: RequestInit): Promise<Listing[]> => {
 
   return customFetch<Listing[]>(getGetAdminListingsUrl(params),
   {
@@ -1434,7 +1434,7 @@ export const getGetAdminListingsQueryKey = (params?: GetAdminListingsParams,) =>
     }
 
 
-export const getGetAdminListingsQueryOptions = <TData = Awaited<ReturnType<typeof getAdminListings>>, TError = ErrorType<void>>(params: GetAdminListingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminListings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetAdminListingsQueryOptions = <TData = Awaited<ReturnType<typeof getAdminListings>>, TError = ErrorType<void>>(params?: GetAdminListingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminListings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1461,7 +1461,7 @@ export type GetAdminListingsQueryError = ErrorType<void>
  */
 
 export function useGetAdminListings<TData = Awaited<ReturnType<typeof getAdminListings>>, TError = ErrorType<void>>(
- params: GetAdminListingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminListings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetAdminListingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminListings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

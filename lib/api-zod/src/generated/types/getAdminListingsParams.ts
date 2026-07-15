@@ -7,6 +7,5 @@
  */
 
 export type GetAdminListingsParams = {
-password: string;
 status?: string;
 };

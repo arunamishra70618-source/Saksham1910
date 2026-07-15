@@ -185,7 +185,6 @@ export interface Report {
 
 export interface AadhaarVerifyInput {
   action: string;
-  password: string;
 }
 
 export interface Review {
@@ -254,7 +253,6 @@ userId: string;
 };
 
 export type GetAdminListingsParams = {
-password: string;
 status?: string;
 };
 
