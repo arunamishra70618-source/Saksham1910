@@ -7,10 +7,12 @@ import paymentsRouter from "./payments";
 import adminRouter from "./admin";
 import reviewsRouter from "./reviews";
 import ownerRouter from "./owner";
+import authRouter from "./auth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use("/auth", authRouter);
 router.use("/listings", listingsRouter);
 router.use("/visits", visitsRouter);
 router.use("/reports", reportsRouter);

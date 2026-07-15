@@ -7,6 +7,7 @@
  */
 
 export * from './aadhaarVerifyInput';
+export * from './apiError';
 export * from './escrowActionInput';
 export * from './escrowOrder';
 export * from './escrowOrderInput';
@@ -18,6 +19,9 @@ export * from './listing';
 export * from './listingInput';
 export * from './listingStats';
 export * from './listingUpdate';
+export * from './otpSendData';
+export * from './otpVerifyData';
+export * from './otpVerifyDataUser';
 export * from './ownerDashboard';
 export * from './ownerListingStat';
 export * from './paymentConfirmInput';
@@ -31,5 +35,7 @@ export * from './reviewInput';
 export * from './reviewReplyInput';
 export * from './saveInput';
 export * from './saveResult';
+export * from './sendOtpInput';
+export * from './verifyOtpInput';
 export * from './visit';
 export * from './visitInput';

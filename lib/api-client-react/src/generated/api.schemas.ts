@@ -239,6 +239,38 @@ export interface OwnerDashboard {
   listings: OwnerListingStat[];
 }
 
+export interface SendOtpInput {
+  phone: string;
+  email: string;
+  name?: string;
+}
+
+export interface OtpSendData {
+  message: string;
+  devOtp?: string;
+}
+
+export interface VerifyOtpInput {
+  phone: string;
+  email: string;
+  name?: string;
+  otp: string;
+}
+
+export type OtpVerifyDataUser = {
+  name: string;
+  email: string;
+  phone: string;
+};
+
+export interface OtpVerifyData {
+  user: OtpVerifyDataUser;
+}
+
+export interface ApiError {
+  error: string;
+}
+
 export type GetListingsParams = {
 type?: string;
 gender?: string;

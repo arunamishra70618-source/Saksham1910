@@ -38,7 +38,7 @@ app.use(
       cb(new Error("CORS: origin not allowed"));
     },
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Admin-Token"],
     credentials: true,
     maxAge: 86400,
   })

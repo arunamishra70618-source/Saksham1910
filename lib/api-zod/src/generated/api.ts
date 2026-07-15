@@ -9,6 +9,40 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Send OTP to phone and email
+ */
+export const SendOtpBody = zod.object({
+  "phone": zod.string(),
+  "email": zod.string(),
+  "name": zod.string().optional()
+})
+
+export const SendOtpResponse = zod.object({
+  "message": zod.string(),
+  "devOtp": zod.string().optional()
+})
+
+
+/**
+ * @summary Verify OTP and return user
+ */
+export const VerifyOtpBody = zod.object({
+  "phone": zod.string(),
+  "email": zod.string(),
+  "name": zod.string().optional(),
+  "otp": zod.string()
+})
+
+export const VerifyOtpResponse = zod.object({
+  "user": zod.object({
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string()
+})
+})
+
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
