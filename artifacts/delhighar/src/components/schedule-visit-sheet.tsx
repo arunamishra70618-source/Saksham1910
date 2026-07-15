@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { X, Calendar, Clock, User, Phone, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Calendar, Clock, User, Phone, CheckCircle2, ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import { useScheduleVisit } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/lib/use-notifications";
 
 const TIME_SLOTS = [
   { label: "9–11 AM", value: "09:00", period: "Morning" },
@@ -44,6 +45,7 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const visitMutation = useScheduleVisit();
+  const { status: notifStatus, request: requestNotif, notify } = useNotifications();
 
   const dates = getDates(14);
   const [selectedDate, setSelectedDate] = useState<Date>(dates[0]);
@@ -65,7 +67,7 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
     return e;
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
@@ -84,7 +86,21 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
         },
       },
       {
-        onSuccess: () => setSuccess(true),
+        onSuccess: async () => {
+          setSuccess(true);
+          const slot = TIME_SLOTS.find((s) => s.value === selectedSlot);
+          const dateStr = selectedDate.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
+          const notifBody = `${dateStr} · ${slot?.label} — ${listingName}`;
+
+          if (notifStatus === "default") {
+            const result = await requestNotif();
+            if (result === "granted") {
+              notify("✅ Visit Booked!", { body: notifBody, tag: `visit-${listingId}` });
+            }
+          } else if (notifStatus === "granted") {
+            notify("✅ Visit Booked!", { body: notifBody, tag: `visit-${listingId}` });
+          }
+        },
         onError: () => toast({ title: "Could not book visit. Please try again.", variant: "destructive" }),
       }
     );
@@ -111,6 +127,14 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
             </p>
             <p className="text-sm text-foreground font-medium">{slot?.period} · {slot?.label}</p>
           </div>
+
+          {notifStatus === "granted" && (
+            <div className="flex items-center justify-center gap-2 bg-success/8 border border-success/20 rounded-xl px-4 py-2.5 mb-4">
+              <Bell size={14} className="text-success" />
+              <p className="text-xs text-success font-medium">Reminder notification sent!</p>
+            </div>
+          )}
+
           <p className="text-xs text-muted-foreground mb-6">
             The owner will call you on <strong className="text-foreground">+91 {phone}</strong> to confirm.
           </p>
@@ -131,7 +155,6 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
         className="w-full max-w-[480px] bg-background rounded-t-3xl animate-in slide-in-from-bottom-8 duration-300 max-h-[92dvh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b shrink-0">
           <div>
             <h2 className="font-bold text-base">Schedule a Visit</h2>
@@ -146,7 +169,6 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
         </div>
 
         <div className="flex-1 overflow-y-auto pb-4">
-          {/* Date Picker */}
           <div className="px-5 pt-4 pb-2">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -197,7 +219,6 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
             </div>
           </div>
 
-          {/* Time Slots */}
           <div className="px-5 pt-3">
             <div className="flex items-center gap-2 mb-3">
               <Clock size={15} className="text-primary" />
@@ -225,7 +246,6 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
             {errors.slot && <p className="text-destructive text-xs mt-1.5">{errors.slot}</p>}
           </div>
 
-          {/* Contact Info */}
           <div className="px-5 pt-4 space-y-3">
             <div className="flex items-center gap-2 mb-1">
               <User size={15} className="text-primary" />
@@ -267,7 +287,6 @@ export function ScheduleVisitSheet({ listingId, listingName, onClose }: Props) {
           </div>
         </div>
 
-        {/* Submit */}
         <div className="px-5 pt-3 pb-6 border-t shrink-0">
           <button
             onClick={handleSubmit}

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Heart, ShieldCheck, BadgeCheck, AlertTriangle, Trash2 } from "lucide-react";
+import { Heart, ShieldCheck, BadgeCheck, AlertTriangle, Trash2, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Listing, useSaveListing } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatDistance } from "@/lib/use-location";
 
 export function ListingCard({
   listing,
@@ -11,6 +12,7 @@ export function ListingCard({
   index = 0,
   manageMode = false,
   onDeletePress,
+  distance,
 }: {
   listing: Listing;
   isSaved?: boolean;
@@ -18,6 +20,7 @@ export function ListingCard({
   index?: number;
   manageMode?: boolean;
   onDeletePress?: () => void;
+  distance?: number;
 }) {
   const { toast } = useToast();
   const saveMutation = useSaveListing();
@@ -105,6 +108,12 @@ export function ListingCard({
           {listing.escrowEnabled && (
             <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
               <ShieldCheck className="w-3 h-3 mr-1" /> Escrow Pay
+            </Badge>
+          )}
+
+          {distance != null && (
+            <Badge variant="outline" className="border-primary/30 text-primary text-xs font-semibold">
+              <MapPin className="w-3 h-3 mr-1" /> {formatDistance(distance)}
             </Badge>
           )}
         </div>

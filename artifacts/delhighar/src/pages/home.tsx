@@ -1,31 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useGetListings, useDeleteListing } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/listing-card";
 import { Input } from "@/components/ui/input";
-import { Search, UserCircle, LogOut, Shield, Phone, Trash2, X, ShieldCheck, BarChart3 } from "lucide-react";
+import { Search, UserCircle, LogOut, Shield, Phone, Trash2, X, BarChart3, MapPin, Navigation } from "lucide-react";
 import { ListingDetailSheet } from "@/components/listing-detail-sheet";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useUserLocation, formatDistance } from "@/lib/use-location";
+import { useSavedFilters } from "@/lib/use-storage";
 
 export function Home() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState<string>("");
-  const [gender, setGender] = useState<string>("");
-  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
+  const { savedFilters, saveFilters } = useSavedFilters();
+
+  const [search, setSearch] = useState(savedFilters.search || "");
+  const [type, setType] = useState<string>(savedFilters.type || "");
+  const [gender, setGender] = useState<string>(savedFilters.gender || "");
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(savedFilters.verifiedOnly || false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [sortByDistance, setSortByDistance] = useState(false);
 
   const [manageMode, setManageMode] = useState(false);
   const [showAdminPrompt, setShowAdminPrompt] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState(false);
+  const [adminVerifying, setAdminVerifying] = useState(false);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+
+  const { coords, status: locStatus, request: requestLocation, getDistance } = useUserLocation();
 
   const deleteMutation = useDeleteListing();
 
@@ -35,6 +43,10 @@ export function Home() {
     gender: gender || undefined,
     verifiedOnly: verifiedOnly ? "true" : undefined,
   });
+
+  useEffect(() => {
+    saveFilters({ type, gender, verifiedOnly, search });
+  }, [type, gender, verifiedOnly, search]);
 
   const filterChips = [
     { label: "All", value: "" },
@@ -50,16 +62,52 @@ export function Home() {
     { label: "Co-ed", value: "Co-ed" },
   ];
 
-  const handleAdminUnlock = () => {
-    if (adminPassword === "admin123") {
-      setManageMode(true);
-      setShowAdminPrompt(false);
-      setAdminPassword("");
-      setAdminError(false);
-      setShowUserMenu(false);
-      toast({ title: "🗑️ Manage mode ON — tap trash to delete any listing" });
-    } else {
+  const handleNearMe = () => {
+    if (locStatus === "granted" && sortByDistance) {
+      setSortByDistance(false);
+      return;
+    }
+    if (locStatus === "granted") {
+      setSortByDistance(true);
+      toast({ title: "📍 Sorted by distance from you" });
+      return;
+    }
+    requestLocation();
+    toast({ title: "📍 Getting your location..." });
+  };
+
+  useEffect(() => {
+    if (locStatus === "granted" && !sortByDistance) {
+      setSortByDistance(true);
+      toast({ title: "📍 Sorted by nearest PGs" });
+    }
+    if (locStatus === "denied") {
+      toast({ title: "Location permission denied", variant: "destructive" });
+    }
+  }, [locStatus]);
+
+  const handleAdminUnlock = async () => {
+    if (!adminPassword.trim()) return;
+    setAdminVerifying(true);
+    setAdminError(false);
+    try {
+      const res = await fetch("/api/admin/listings", {
+        headers: { "X-Admin-Token": adminPassword },
+      });
+      if (res.ok) {
+        setManageMode(true);
+        setShowAdminPrompt(false);
+        setAdminPassword("");
+        setAdminError(false);
+        setShowUserMenu(false);
+        toast({ title: "🗑️ Manage mode ON — tap trash to delete any listing" });
+      } else {
+        setAdminError(true);
+      }
+    } catch {
       setAdminError(true);
+    } finally {
+      setAdminVerifying(false);
     }
   };
 
@@ -83,7 +131,19 @@ export function Home() {
     );
   };
 
-  const visibleListings = listings?.filter((l) => !deletedIds.has(l.id));
+  const withDistance = listings?.map((l) => ({
+    ...l,
+    _distance: getDistance(l.lat ?? null, l.lng ?? null),
+  }));
+
+  const visibleListings = withDistance
+    ?.filter((l) => !deletedIds.has(l.id))
+    .sort((a, b) => {
+      if (!sortByDistance) return 0;
+      const da = a._distance ?? Infinity;
+      const db = b._distance ?? Infinity;
+      return da - db;
+    });
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -196,6 +256,22 @@ export function Home() {
         )}
 
         <div className="overflow-x-auto no-scrollbar pb-2 flex gap-2">
+          <button
+            onClick={handleNearMe}
+            className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 active:scale-95 flex items-center gap-1.5 shrink-0 ${
+              sortByDistance
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : locStatus === "loading"
+                ? "bg-card text-muted-foreground animate-pulse"
+                : "bg-card text-foreground hover:bg-muted"
+            }`}
+          >
+            {sortByDistance ? <Navigation size={13} /> : <MapPin size={13} />}
+            {locStatus === "loading" ? "Locating..." : sortByDistance ? "Near Me ✓" : "Near Me"}
+          </button>
+
+          <div className="w-px h-6 bg-border self-center" />
+
           {filterChips.map((chip) => (
             <button
               key={chip.label}
@@ -236,6 +312,19 @@ export function Home() {
           </button>
         </div>
       </div>
+
+      {sortByDistance && coords && (
+        <div className="mx-4 mt-3 flex items-center gap-2 bg-primary/8 border border-primary/20 rounded-xl px-3 py-2 animate-in fade-in duration-200">
+          <Navigation size={13} className="text-primary shrink-0" />
+          <p className="text-xs text-primary font-medium">Sorted by distance from your location</p>
+          <button
+            onClick={() => setSortByDistance(false)}
+            className="ml-auto text-primary/60 hover:text-primary transition-colors"
+          >
+            <X size={13} />
+          </button>
+        </div>
+      )}
 
       <div className="flex-1 p-4 space-y-3">
         {isLoading ? (
@@ -286,6 +375,7 @@ export function Home() {
                   listing={listing}
                   index={i}
                   manageMode={manageMode}
+                  distance={listing._distance ?? undefined}
                   onDeletePress={() => setConfirmId(listing.id)}
                   onClick={manageMode ? undefined : () => setSelectedListingId(listing.id)}
                 />
@@ -340,9 +430,10 @@ export function Home() {
 
             <button
               onClick={handleAdminUnlock}
-              className="w-full bg-destructive text-white font-semibold py-3 rounded-xl text-sm mt-2 active:scale-95 transition"
+              disabled={adminVerifying}
+              className="w-full bg-destructive text-white font-semibold py-3 rounded-xl text-sm mt-2 active:scale-95 transition disabled:opacity-60"
             >
-              Unlock Delete Mode
+              {adminVerifying ? "Verifying..." : "Unlock Delete Mode"}
             </button>
           </div>
         </div>
