@@ -88,8 +88,17 @@ router.post("/verify-otp", otpVerifyLimiter, (req, res) => {
   const result = verifyOtp(key, otp);
 
   if (result === "valid") {
-    res.json({
-      user: { name: rawName, email: rawEmail, phone: rawPhone },
+    const user = { name: rawName, email: rawEmail, phone: rawPhone };
+    // Set server-side session (httpOnly cookie)
+    req.session.user = user;
+    req.session.save((err) => {
+      if (err) {
+        req.log.error({ err }, "Session save failed");
+        res.status(500).json({ error: "Session error. Please try again." });
+        return;
+      }
+      logger.info({ phone: rawPhone.slice(0, 6) + "XXXX" }, "User session created");
+      res.json({ user });
     });
     return;
   }
@@ -101,6 +110,28 @@ router.post("/verify-otp", otpVerifyLimiter, (req, res) => {
   };
 
   res.status(400).json({ error: messages[result] });
+});
+
+// Get current session user
+router.get("/me", (req, res) => {
+  if (req.session.user) {
+    res.json({ user: req.session.user });
+  } else {
+    res.status(401).json({ error: "Not authenticated" });
+  }
+});
+
+// Logout — destroy session
+router.post("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      req.log.error({ err }, "Session destroy failed");
+      res.status(500).json({ error: "Logout failed" });
+      return;
+    }
+    res.clearCookie("connect.sid");
+    res.json({ message: "Logged out successfully" });
+  });
 });
 
 export default router;

@@ -1,12 +1,27 @@
-import { Router } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import { eq } from "drizzle-orm";
 import { db, listingsTable, visitsTable } from "@workspace/db";
 
 const router = Router();
 
-router.get("/dashboard/:phone", async (req, res) => {
+// RBAC middleware — require valid session
+function requireSession(req: Request, res: Response, next: NextFunction) {
+  if (!req.session?.user) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+  next();
+}
+
+router.get("/dashboard/:phone", requireSession, async (req, res) => {
   try {
     const { phone } = req.params;
+
+    // RBAC: session phone must match requested phone
+    if (req.session.user?.phone !== phone) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
 
     const listings = await db
       .select()

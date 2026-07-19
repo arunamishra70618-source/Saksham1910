@@ -2,10 +2,17 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import cors from "cors";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
+import session from "express-session";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { generalLimiter } from "./lib/rate-limit";
 import { firewallMiddleware } from "./lib/firewall";
+
+declare module "express-session" {
+  interface SessionData {
+    user?: { name: string; email: string; phone: string };
+  }
+}
 
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
   .split(",")
@@ -54,6 +61,20 @@ app.use(
       res(res) {
         return { statusCode: res.statusCode };
       },
+    },
+  })
+);
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "dev-secret-change-in-prod",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   })
 );

@@ -24,6 +24,27 @@ export const SendOtpResponse = zod.object({
 
 
 /**
+ * @summary Get current session user
+ */
+export const GetMeResponse = zod.object({
+  "user": zod.object({
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string()
+})
+})
+
+
+/**
+ * @summary Destroy session and log out
+ */
+export const LogoutResponse = zod.object({
+  "message": zod.string(),
+  "devOtp": zod.string().optional()
+})
+
+
+/**
  * @summary Verify OTP and return user
  */
 export const VerifyOtpBody = zod.object({
