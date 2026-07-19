@@ -132,6 +132,8 @@ export const CreateListingBody = zod.object({
   "gali": zod.string(),
   "landmark": zod.string(),
   "mapsLink": zod.string().optional(),
+  "lat": zod.string().optional(),
+  "lng": zod.string().optional(),
   "rent": zod.number(),
   "deposit": zod.number(),
   "roomType": zod.string(),

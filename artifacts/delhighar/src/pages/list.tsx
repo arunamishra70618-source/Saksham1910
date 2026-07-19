@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ImagePlus, X, CheckCircle2, Camera } from "lucide-react";
+import { ImagePlus, X, CheckCircle2, Camera, MapPin, Loader2, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 
 const AMENITIES = ["WiFi", "AC", "Meals", "Laundry", "Parking", "Gym", "CCTV", "RO Water", "Wardrobe", "Study Table", "Lift", "Power Backup"];
 const SECURITY_FEATURES = ["CCTV", "Guard", "Main Gate Lock", "Biometric Entry", "Police Verification", "Fire Safety", "Lady Guard", "Smart Lock", "Intercom", "Society Guard"];
+
+type GpsStatus = "idle" | "loading" | "captured" | "denied" | "error";
 
 export function ListProperty() {
   const [step, setStep] = useState(1);
@@ -20,6 +22,7 @@ export function ListProperty() {
 
   const [formData, setFormData] = useState({
     name: "", type: "PG", gender: "Any", area: "", gali: "", landmark: "", mapsLink: "",
+    lat: "", lng: "",
     rent: "", deposit: "", roomType: "Private", amenities: [] as string[],
     securityFeatures: [] as string[], curfewTime: "", guestPolicy: "Open",
     smokingAllowed: false, alcoholAllowed: false, nonVegAllowed: false,
@@ -28,6 +31,8 @@ export function ListProperty() {
 
   const [photos, setPhotos] = useState<{ file: File; previewUrl: string }[]>([]);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [gpsStatus, setGpsStatus] = useState<GpsStatus>("idle");
+  const [showManualLink, setShowManualLink] = useState(false);
 
   const updateForm = (key: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [key]: value }));
@@ -57,6 +62,34 @@ export function ListProperty() {
     });
   };
 
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setGpsStatus("error");
+      toast({ title: "GPS not supported in this browser", variant: "destructive" });
+      return;
+    }
+    setGpsStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+        setFormData(prev => ({ ...prev, lat, lng, mapsLink }));
+        setGpsStatus("captured");
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          setGpsStatus("denied");
+          toast({ title: "Location permission denied", description: "Allow location access in browser settings, or paste a Google Maps link manually.", variant: "destructive" });
+        } else {
+          setGpsStatus("error");
+          toast({ title: "Could not get location", description: "Please try again or paste a Google Maps link manually.", variant: "destructive" });
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const handleSubmit = () => {
     createMutation.mutate({
       data: {
@@ -67,6 +100,8 @@ export function ListProperty() {
         gali: formData.gali,
         landmark: formData.landmark,
         mapsLink: formData.mapsLink,
+        lat: formData.lat,
+        lng: formData.lng,
         rent: Number(formData.rent) || 0,
         deposit: Number(formData.deposit) || 0,
         roomType: formData.roomType,
@@ -95,7 +130,7 @@ export function ListProperty() {
       <div className="flex flex-col h-full bg-background items-center justify-center p-6 text-center">
         <CheckCircle2 className="w-20 h-20 text-success mb-4" />
         <h1 className="text-2xl font-bold mb-2">Listing Posted!</h1>
-        <p className="text-muted-foreground mb-8">Your property is now live on PG.com.</p>
+        <p className="text-muted-foreground mb-8">Your property is now live on DelhiGhar.</p>
         <Button onClick={() => setLocation("/")} className="w-full">Browse Listings</Button>
       </div>
     );
@@ -155,9 +190,87 @@ export function ListProperty() {
               <label className="text-sm font-medium mb-1 block">Landmark</label>
               <Input value={formData.landmark} onChange={e => updateForm("landmark", e.target.value)} placeholder="e.g. Near Metro Pillar 32, Opposite SBI" />
             </div>
+
+            {/* ── GPS Location ── */}
             <div>
-              <label className="text-sm font-medium mb-1 block">Google Maps Link <span className="text-muted-foreground font-normal">(Optional)</span></label>
-              <Input value={formData.mapsLink} onChange={e => updateForm("mapsLink", e.target.value)} placeholder="https://maps.app.goo.gl/..." />
+              <label className="text-sm font-medium mb-1 block">
+                Property Location
+                <span className="text-muted-foreground font-normal ml-1">(Optional)</span>
+              </label>
+
+              {gpsStatus === "idle" || gpsStatus === "denied" || gpsStatus === "error" ? (
+                <button
+                  type="button"
+                  onClick={handleGetLocation}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 active:scale-95 transition-all text-primary font-medium text-sm"
+                >
+                  <MapPin size={18} />
+                  Tap to capture property location automatically
+                </button>
+              ) : gpsStatus === "loading" ? (
+                <div className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-muted/40 text-muted-foreground text-sm">
+                  <Loader2 size={16} className="animate-spin" />
+                  Getting your location…
+                </div>
+              ) : (
+                // captured
+                <div className="rounded-xl border border-success/40 bg-success/8 p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-success shrink-0" />
+                    <span className="text-sm font-semibold text-success">Location captured!</span>
+                    <button
+                      type="button"
+                      onClick={() => { setGpsStatus("idle"); updateForm("lat", ""); updateForm("lng", ""); updateForm("mapsLink", ""); }}
+                      className="ml-auto text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      ✕ Reset
+                    </button>
+                  </div>
+                  <div className="text-xs text-muted-foreground font-mono">
+                    {formData.lat}, {formData.lng}
+                  </div>
+                  <a
+                    href={formData.mapsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary underline"
+                  >
+                    <MapPin size={11} />
+                    Verify on Google Maps
+                  </a>
+                </div>
+              )}
+
+              {/* Manual link fallback */}
+              <button
+                type="button"
+                onClick={() => setShowManualLink(v => !v)}
+                className="flex items-center gap-1 text-xs text-muted-foreground mt-2 hover:text-foreground transition-colors"
+              >
+                <ChevronDown size={13} className={`transition-transform ${showManualLink ? "rotate-180" : ""}`} />
+                {showManualLink ? "Hide" : "Or paste Google Maps link manually"}
+              </button>
+
+              {showManualLink && (
+                <Input
+                  className="mt-2 text-xs"
+                  value={formData.mapsLink}
+                  onChange={e => {
+                    updateForm("mapsLink", e.target.value);
+                    // if manually pasting, clear GPS coords
+                    if (gpsStatus === "captured") {
+                      setGpsStatus("idle");
+                      updateForm("lat", "");
+                      updateForm("lng", "");
+                    }
+                  }}
+                  placeholder="https://maps.app.goo.gl/..."
+                />
+              )}
+
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Helps tenants find your property on the map.
+              </p>
             </div>
           </div>
         )}

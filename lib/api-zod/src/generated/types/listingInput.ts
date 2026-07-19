@@ -14,6 +14,8 @@ export interface ListingInput {
   gali: string;
   landmark: string;
   mapsLink?: string;
+  lat?: string;
+  lng?: string;
   rent: number;
   deposit: number;
   roomType: string;

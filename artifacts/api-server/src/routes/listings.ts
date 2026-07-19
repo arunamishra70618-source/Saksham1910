@@ -80,6 +80,8 @@ router.post("/", writeLimiter, async (req, res) => {
         gali: sanitizeString(body.gali, 200),
         landmark: sanitizeString(body.landmark, 200),
         mapsLink: body.mapsLink ? sanitizeString(body.mapsLink, 500) : null,
+        lat: body.lat ? sanitizeString(String(body.lat), 30) : null,
+        lng: body.lng ? sanitizeString(String(body.lng), 30) : null,
         rent,
         deposit,
         roomType: ALLOWED_ROOM_TYPES.includes(body.roomType) ? body.roomType : "Private",
