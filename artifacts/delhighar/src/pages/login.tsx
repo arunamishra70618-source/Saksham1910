@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "wouter";
-import { ShieldCheck, ArrowLeft, RefreshCw, Phone, Mail } from "lucide-react";
+import { ArrowLeft, RefreshCw, Phone, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useSendOtp, useVerifyOtp } from "@workspace/api-client-react";
+import { MeraPGWordmark } from "@/components/logo";
 
 type Step = "details" | "otp";
 type Mode = "login" | "signup";
@@ -115,12 +116,11 @@ export function Login() {
   if (step === "otp") {
     return (
       <div className="min-h-[100dvh] flex flex-col bg-background">
-        <div className="bg-secondary px-5 pt-14 pb-10 text-white text-center">
+        <div className="bg-gradient-to-br from-indigo-700 via-primary to-violet-600 px-5 pt-14 pb-10 text-white text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <ShieldCheck size={32} className="text-primary" />
-            <span className="text-2xl font-bold tracking-tight">Mera PG</span>
+            <MeraPGWordmark size="lg" className="[&>span]:text-white [&_span.text-primary]:text-amber-300" />
           </div>
-          <p className="text-white/70 text-sm">Zero broker. Real homes. Safe deals.</p>
+          <p className="text-white/75 text-sm">Zero broker. Real homes. Safe deals.</p>
         </div>
 
         <div className="flex-1 px-5 pt-6 pb-8">
@@ -228,12 +228,11 @@ export function Login() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background">
-      <div className="bg-secondary px-5 pt-14 pb-10 text-white text-center">
+      <div className="bg-gradient-to-br from-indigo-700 via-primary to-violet-600 px-5 pt-14 pb-10 text-white text-center">
         <div className="flex items-center justify-center gap-2 mb-3">
-          <ShieldCheck size={32} className="text-primary" />
-          <span className="text-2xl font-bold tracking-tight">Mera PG</span>
+          <MeraPGWordmark size="lg" className="[&>span]:text-white [&_span.text-primary]:text-amber-300" />
         </div>
-        <p className="text-white/70 text-sm">Zero broker. Real homes. Safe deals.</p>
+        <p className="text-white/75 text-sm">Zero broker. Real homes. Safe deals.</p>
       </div>
 
       <div className="flex-1 px-5 pt-6 pb-8">

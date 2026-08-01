@@ -261,16 +261,16 @@ export function PrivacyPolicy() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-[#1A2340] text-white px-4 pt-12 pb-6">
+      <div className="bg-gradient-to-br from-indigo-700 via-primary to-violet-600 text-white px-4 pt-12 pb-6">
         <Link href="/" className="inline-flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors text-sm">
           <ArrowLeft size={16} />
           Back
         </Link>
         <div className="flex items-center gap-3">
-          <Shield size={28} className="text-primary" />
+          <Shield size={28} className="text-white/90" />
           <div>
             <h1 className="text-2xl font-bold">Privacy Policy</h1>
-            <p className="text-white/60 text-xs mt-0.5">Effective Date: {EFFECTIVE_DATE}</p>
+            <p className="text-white/65 text-xs mt-0.5">Effective Date: {EFFECTIVE_DATE}</p>
           </div>
         </div>
       </div>

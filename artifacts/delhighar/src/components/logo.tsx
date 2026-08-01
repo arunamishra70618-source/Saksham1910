@@ -5,6 +5,11 @@ interface LogoProps {
   className?: string;
 }
 
+/**
+ * MeraPGLogo — a location-pin containing a minimal roofline.
+ * The pin shape = "find / discover". The roof inside = "home / PG".
+ * Together: find your home.
+ */
 export function MeraPGLogo({ size = 32, className }: LogoProps) {
   return (
     <svg
@@ -16,24 +21,45 @@ export function MeraPGLogo({ size = 32, className }: LogoProps) {
       className={className}
     >
       <defs>
-        <linearGradient id="lb" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+        <linearGradient id="mp-bg" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
           <stop stopColor="#4338CA" />
-          <stop offset="1" stopColor="#7C3AED" />
+          <stop offset="1" stopColor="#6D28D9" />
         </linearGradient>
-        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor="#F59E0B" />
-          <stop offset="1" stopColor="#D97706" />
+        <linearGradient id="mp-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop stopColor="#FBBF24" />
+          <stop offset="1" stopColor="#F59E0B" />
         </linearGradient>
       </defs>
-      <rect width="200" height="200" rx="48" fill="url(#lb)" />
-      <path d="M100 36L166 92H34L100 36Z" fill="white" opacity="0.96" />
-      <rect x="120" y="50" width="13" height="42" rx="3" fill="white" opacity="0.75" />
-      <rect x="44" y="92" width="112" height="76" rx="4" fill="white" opacity="0.96" />
-      <rect x="79" y="114" width="42" height="54" rx="8" fill="url(#lb)" />
-      <circle cx="113" cy="143" r="3" fill="url(#lg)" />
-      <rect x="54" y="104" width="19" height="15" rx="4" fill="url(#lb)" opacity="0.55" />
-      <rect x="127" y="104" width="19" height="15" rx="4" fill="url(#lb)" opacity="0.55" />
-      <rect x="72" y="162" width="56" height="5" rx="2.5" fill="url(#lg)" />
+
+      {/* Rounded square container */}
+      <rect width="200" height="200" rx="52" fill="url(#mp-bg)" />
+
+      {/* ── Location pin body (teardrop) ── */}
+      {/* Circle top */}
+      <ellipse cx="100" cy="85" rx="44" ry="44" fill="white" opacity="0.97" />
+      {/* Pin tail */}
+      <path
+        d="M 100 129 L 75 100 Q 56 79 56 85 Q 56 129 100 162 Q 144 129 144 85 Q 144 79 125 100 Z"
+        fill="white"
+        opacity="0.97"
+      />
+      {/* Cleaner teardrop — drawn as one path */}
+      <path
+        d="M100 26C76.8 26 58 44.8 58 68C58 90.5 88.2 128.4 97.1 139.2C98.7 141.2 101.3 141.2 102.9 139.2C111.8 128.4 142 90.5 142 68C142 44.8 123.2 26 100 26Z"
+        fill="white"
+        opacity="0.97"
+      />
+
+      {/* ── Roof / chevron inside the pin ── */}
+      <path
+        d="M100 46 L126 68 L120 68 L120 90 L80 90 L80 68 L74 68 Z"
+        fill="url(#mp-bg)"
+      />
+      {/* Door notch inside roof */}
+      <rect x="91" y="74" width="18" height="16" rx="9" fill="white" opacity="0.9" />
+
+      {/* Gold dot at pin tip */}
+      <circle cx="100" cy="162" r="6" fill="url(#mp-gold)" />
     </svg>
   );
 }

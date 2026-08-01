@@ -24,13 +24,13 @@ export function ForgotPassword() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background">
-      <div className="bg-secondary px-5 pt-12 pb-8 text-white">
+      <div className="bg-gradient-to-br from-indigo-700 via-primary to-violet-600 px-5 pt-12 pb-8 text-white">
         <Link href="/login" data-testid="button-back" className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm mb-6">
           <ArrowLeft size={18} />
           Back to Login
         </Link>
         <h1 className="text-2xl font-bold">Forgot Password?</h1>
-        <p className="text-white/70 text-sm mt-1">No worries, we'll send you reset instructions.</p>
+        <p className="text-white/75 text-sm mt-1">No worries, we'll send you reset instructions.</p>
       </div>
 
       <div className="flex-1 px-5 pt-8 pb-8">

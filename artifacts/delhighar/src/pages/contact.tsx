@@ -37,16 +37,16 @@ export function Contact() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background pb-10">
-      <div className="bg-secondary px-5 pt-12 pb-8 text-white">
+      <div className="bg-gradient-to-br from-indigo-700 via-primary to-violet-600 px-5 pt-12 pb-8 text-white">
         <Link href="/" data-testid="button-back" className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm mb-6">
           <ArrowLeft size={18} />
           Back
         </Link>
         <div className="flex items-center gap-3 mb-2">
-          <MessageSquare size={24} className="text-primary" />
+          <MessageSquare size={24} className="text-white/90" />
           <h1 className="text-2xl font-bold">Contact Us</h1>
         </div>
-        <p className="text-white/70 text-sm">We're here to help. Reach out any time.</p>
+        <p className="text-white/75 text-sm">We're here to help. Reach out any time.</p>
       </div>
 
       <div className="px-5 pt-6 space-y-3">
