@@ -43,76 +43,76 @@
 }
 
 :root {
-  --background: 240 20% 97%;       /* Cool light #F5F5FA */
-  --foreground: 250 40% 14%;       /* Deep violet-navy #17143D */
+  /* ── Premium Warm-White background ── */
+  --background: 36 25% 97%;          /* #FAF9F7 — warm off-white */
+  --foreground: 224 71% 7%;          /* #0B0E1C — deep charcoal */
 
   --card: 0 0% 100%;
-  --card-foreground: 250 40% 14%;
-  --card-border: 240 15% 88%;
+  --card-foreground: 224 71% 7%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 250 40% 14%;
-  --popover-border: 240 15% 88%;
+  --popover-foreground: 224 71% 7%;
 
-  --primary: 262 83% 57%;          /* Deep Violet #7C3AED */
+  /* ── Royal Indigo primary ── */
+  --primary: 243 75% 59%;            /* #4F46E5 — premium indigo */
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 250 40% 14%;        /* Deep violet-navy #17143D */
+  --secondary: 224 71% 7%;
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 240 15% 92%;
-  --muted-foreground: 250 20% 42%;
+  --muted: 220 16% 93%;
+  --muted-foreground: 220 12% 46%;
 
-  --accent: 262 60% 94%;           /* Soft violet tint */
-  --accent-foreground: 262 83% 40%;
+  /* ── Amber accent for gold highlights ── */
+  --accent: 38 96% 94%;
+  --accent-foreground: 32 95% 38%;
 
-  --destructive: 2 76% 55%;        /* #E53935 */
+  --destructive: 2 76% 54%;
   --destructive-foreground: 0 0% 100%;
 
-  --success: 141 73% 42%;          /* #1DB954 */
+  --success: 158 62% 38%;            /* #16A34A — emerald green */
   --success-foreground: 0 0% 100%;
 
-  --border: 240 15% 88%;
-  --input: 240 15% 88%;
-  --ring: 262 83% 57%;
+  --border: 220 16% 89%;
+  --input: 220 16% 89%;
+  --ring: 243 75% 59%;
 
-  --app-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --radius: 0.75rem;
+  /* ── Plus Jakarta Sans — OFL licensed, free for commercial use ── */
+  --app-font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --radius: 0.875rem;
 }
 
 .dark {
-  --background: 250 40% 10%;
-  --foreground: 240 20% 96%;
+  --background: 224 50% 8%;
+  --foreground: 220 20% 95%;
 
-  --card: 250 40% 14%;
-  --card-foreground: 240 20% 96%;
-  --card-border: 250 40% 20%;
+  --card: 224 47% 12%;
+  --card-foreground: 220 20% 95%;
 
-  --popover: 250 40% 14%;
-  --popover-foreground: 240 20% 96%;
-  --popover-border: 250 40% 20%;
+  --popover: 224 47% 12%;
+  --popover-foreground: 220 20% 95%;
 
-  --primary: 262 83% 63%;
+  --primary: 243 75% 66%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 250 40% 20%;
+  --secondary: 224 47% 16%;
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 250 40% 18%;
-  --muted-foreground: 240 15% 72%;
+  --muted: 224 47% 16%;
+  --muted-foreground: 220 15% 64%;
 
-  --accent: 262 40% 22%;
-  --accent-foreground: 262 83% 80%;
+  --accent: 243 40% 20%;
+  --accent-foreground: 243 75% 80%;
 
-  --destructive: 2 76% 55%;
+  --destructive: 2 76% 54%;
   --destructive-foreground: 0 0% 100%;
 
-  --success: 141 73% 42%;
+  --success: 158 62% 38%;
   --success-foreground: 0 0% 100%;
 
-  --border: 250 40% 22%;
-  --input: 250 40% 22%;
-  --ring: 262 83% 63%;
+  --border: 224 47% 20%;
+  --input: 224 47% 20%;
+  --ring: 243 75% 66%;
 }
 
 @layer base {
@@ -122,4 +122,86 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  /* Smooth scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
 }
+
+/* ── Premium Card Hover — lift + indigo shadow ── */
+.card-hover {
+  transition: transform 220ms cubic-bezier(0.34, 1.2, 0.64, 1),
+              box-shadow 220ms ease,
+              border-color 220ms ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px -8px hsla(243, 75%, 59%, 0.22),
+              0 4px 10px -4px hsla(243, 75%, 59%, 0.10);
+}
+.card-hover:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow: none;
+}
+
+/* ── Button glow hover ── */
+.btn-glow {
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 0 3px hsla(243, 75%, 59%, 0.22);
+  transform: translateY(-1px);
+}
+.btn-glow:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+}
+
+/* ── Nav icon spring bounce ── */
+.nav-icon-group {
+  transition: color 200ms ease;
+}
+.nav-icon-group .nav-icon {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nav-icon-group:hover .nav-icon {
+  transform: translateY(-3px) scale(1.18);
+}
+.nav-icon-group:active .nav-icon {
+  transform: translateY(0) scale(0.95);
+}
+
+/* ── Chip hover ── */
+.chip-hover {
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease,
+              box-shadow 180ms ease;
+}
+.chip-hover:hover:not(.chip-active) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px -3px hsla(224, 71%, 7%, 0.14);
+}
+.chip-hover:active {
+  transform: scale(0.96);
+}
+
+/* ── Link underline slide ── */
+.link-slide {
+  position: relative;
+  display: inline-block;
+}
+.link-slide::after {
+  content: "";
+  position: absolute;
+  bottom: -1px; left: 0;
+  width: 0; height: 1.5px;
+  background: hsl(var(--primary));
+  border-radius: 99px;
+  transition: width 200ms ease;
+}
+.link-slide:hover::after { width: 100%; }
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

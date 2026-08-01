@@ -130,7 +130,7 @@ export function ListProperty() {
       <div className="flex flex-col h-full bg-background items-center justify-center p-6 text-center">
         <CheckCircle2 className="w-20 h-20 text-success mb-4" />
         <h1 className="text-2xl font-bold mb-2">Listing Posted!</h1>
-        <p className="text-muted-foreground mb-8">Your property is now live on DelhiGhar.</p>
+        <p className="text-muted-foreground mb-8">Your property is now live on Mera PG.</p>
         <Button onClick={() => setLocation("/")} className="w-full">Browse Listings</Button>
       </div>
     );

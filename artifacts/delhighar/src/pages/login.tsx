@@ -118,7 +118,7 @@ export function Login() {
         <div className="bg-secondary px-5 pt-14 pb-10 text-white text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
             <ShieldCheck size={32} className="text-primary" />
-            <span className="text-2xl font-bold tracking-tight">PG.com</span>
+            <span className="text-2xl font-bold tracking-tight">Mera PG</span>
           </div>
           <p className="text-white/70 text-sm">Zero broker. Real homes. Safe deals.</p>
         </div>
@@ -231,7 +231,7 @@ export function Login() {
       <div className="bg-secondary px-5 pt-14 pb-10 text-white text-center">
         <div className="flex items-center justify-center gap-2 mb-3">
           <ShieldCheck size={32} className="text-primary" />
-          <span className="text-2xl font-bold tracking-tight">PG.com</span>
+          <span className="text-2xl font-bold tracking-tight">Mera PG</span>
         </div>
         <p className="text-white/70 text-sm">Zero broker. Real homes. Safe deals.</p>
       </div>

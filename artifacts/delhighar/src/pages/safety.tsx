@@ -44,7 +44,7 @@ export function Safety() {
     <div className="flex flex-col h-full bg-background">
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur py-4 px-4 border-b">
         <h1 className="text-2xl font-bold text-foreground">Safety Guide</h1>
-        <p className="text-sm text-muted-foreground mt-1">PG.com keeps you safe from brokers and frauds.</p>
+        <p className="text-sm text-muted-foreground mt-1">Mera PG keeps you safe from brokers and frauds.</p>
       </div>
 
       <div className="flex-1 p-4 space-y-4">

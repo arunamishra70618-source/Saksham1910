@@ -22,12 +22,12 @@ export async function sendEmailOtp(
   const greeting = name ? `Hi ${name},` : "Hello,";
 
   await transporter.sendMail({
-    from: `"PG.com" <${GMAIL_USER}>`,
+    from: `"Mera PG" <${GMAIL_USER}>`,
     to: email,
-    subject: `${otp} — Your PG.com login OTP`,
+    subject: `${otp} — Your Mera PG login OTP`,
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-        <h2 style="color:#7C3AED;margin-bottom:4px">PG.com</h2>
+        <h2 style="color:#7C3AED;margin-bottom:4px">Mera PG</h2>
         <p style="color:#64748b;font-size:13px;margin-top:0">Zero broker. Real homes. Safe deals.</p>
         <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0"/>
         <p style="font-size:15px;color:#1e293b">${greeting}</p>

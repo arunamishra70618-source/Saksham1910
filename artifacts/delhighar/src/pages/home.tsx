@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useUserLocation, formatDistance } from "@/lib/use-location";
 import { useSavedFilters } from "@/lib/use-storage";
+import { MeraPGWordmark } from "@/components/logo";
 
 export function Home() {
   const { user, logout } = useAuth();
@@ -147,18 +148,10 @@ export function Home() {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur pt-4 pb-2 px-4 border-b">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search area or property name..."
-              className="pl-9 bg-card border-none shadow-sm"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur pt-3 pb-2 px-4 border-b border-border/60">
+        {/* Logo + user row */}
+        <div className="flex items-center justify-between mb-3">
+          <MeraPGWordmark size="md" />
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
@@ -238,6 +231,17 @@ export function Home() {
               </>
             )}
           </div>
+        </div>
+
+        {/* Search bar */}
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search area or property name..."
+            className="pl-9 bg-card border-none shadow-sm"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
         {manageMode && (

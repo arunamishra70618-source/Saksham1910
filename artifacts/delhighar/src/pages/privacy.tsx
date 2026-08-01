@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowLeft, Shield, User, Home, ShieldCheck } from "lucide-react";
 
-const APP_NAME = "DelhiGhar";
+const APP_NAME = "Mera PG";
 const DEVELOPER_EMAIL = "mishra250zxclp@gmail.com";
 const DEVELOPER_PHONE = "+91 96961 49694";
 const EFFECTIVE_DATE = "July 19, 2026";
@@ -46,10 +46,10 @@ const adminDataRows = [
 
 const sections = [
   {
-    title: "1. About DelhiGhar",
+    title: "1. About Mera PG",
     content: [
       `${APP_NAME} is a zero-broker rental property marketplace for Delhi, designed to connect tenants directly with verified property owners. The platform supports Flat, PG, and Hostel listings across Delhi, and provides identity verification, escrow payments, fraud reporting, visit scheduling, and location-based property discovery.`,
-      "By using DelhiGhar, you agree to the terms of this Privacy Policy. If you do not agree, please discontinue use of the app.",
+      "By using Mera PG, you agree to the terms of this Privacy Policy. If you do not agree, please discontinue use of the app.",
     ],
   },
   {
@@ -92,14 +92,14 @@ const sections = [
       `${APP_NAME} may request permission to send you browser push notifications.`,
       "Notifications are used for: visit booking confirmations, visit reminders, and important account alerts.",
       "**Push notification permission is optional.** You can deny it and the app works normally.",
-      "You can revoke notification permission at any time via your browser settings (Settings → Notifications → DelhiGhar).",
+      "You can revoke notification permission at any time via your browser settings (Settings → Notifications → Mera PG).",
       "We do not send marketing or promotional notifications. Only transactional alerts related to your activity.",
     ],
   },
   {
     title: "7. Escrow Payments",
     content: [
-      "Payment processing is powered by Razorpay, a PCI-DSS compliant payment gateway. DelhiGhar does not store full card, UPI, or bank account details on its servers.",
+      "Payment processing is powered by Razorpay, a PCI-DSS compliant payment gateway. Mera PG does not store full card, UPI, or bank account details on its servers.",
       "Escrow funds are held securely and released to property owners only after the tenant confirms a satisfactory property visit.",
       "Full refunds are issued if a visit is cancelled before it takes place, or if a fraud report against the property is confirmed valid by our admin team.",
       "For payment disputes, contact us at " + DEVELOPER_EMAIL + " within 7 days of the transaction.",
@@ -137,7 +137,7 @@ const sections = [
   {
     title: "11. Session Security & Cookies",
     content: [
-      "After OTP login, DelhiGhar sets a secure **httpOnly session cookie** on your browser. This cookie cannot be read by JavaScript or browser extensions — only by our server.",
+      "After OTP login, Mera PG sets a secure **httpOnly session cookie** on your browser. This cookie cannot be read by JavaScript or browser extensions — only by our server.",
       "Session cookies expire automatically after **7 days** of inactivity. You can also log out manually to destroy the session immediately.",
       "We use **localStorage** only for non-sensitive display preferences (recently viewed listings, last used filters). No personal or account data is stored in localStorage.",
       "We do not use advertising cookies, tracking pixels, or cross-site tracking cookies of any kind.",
@@ -176,7 +176,7 @@ const sections = [
   {
     title: "15. Account & Data Deletion",
     content: [
-      "You have the right to delete your DelhiGhar account and all associated personal data at any time.",
+      "You have the right to delete your Mera PG account and all associated personal data at any time.",
       "**How to request deletion:**",
       "1. Send an email to **" + DEVELOPER_EMAIL + "** with subject: **'Account Deletion Request'**",
       "2. Include your registered phone number and name in the email.",
@@ -198,7 +198,7 @@ const sections = [
     title: "17. Grievance Officer",
     content: [
       "In accordance with the Information Technology Act, 2000 and IT (Intermediary Guidelines) Rules, the details of the Grievance Officer are:",
-      "**Name:** DelhiGhar Support Team",
+      "**Name:** Mera PG Support Team",
       "**Email:** " + DEVELOPER_EMAIL,
       "**Phone:** " + DEVELOPER_PHONE,
       "**Address:** New Delhi, India",

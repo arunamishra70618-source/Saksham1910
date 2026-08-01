@@ -40,7 +40,7 @@ export function ForgotPassword() {
               <div className="flex items-start gap-3">
                 <Mail size={20} className="text-primary mt-0.5 shrink-0" />
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Enter the email address associated with your PG.com account. We'll send you a link to reset your password.
+                  Enter the email address associated with your Mera PG account. We'll send you a link to reset your password.
                 </p>
               </div>
             </div>

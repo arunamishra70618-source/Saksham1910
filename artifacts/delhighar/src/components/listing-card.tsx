@@ -56,10 +56,9 @@ export function ListingCard({
   return (
     <div
       className={`bg-card rounded-2xl p-4 shadow-sm relative overflow-hidden border-l-4 ${accentColor}
-        transition-all duration-200 ease-out
         ${manageMode
           ? "ring-1 ring-destructive/20"
-          : "hover:shadow-md active:scale-[0.985] cursor-pointer"}
+          : "card-hover cursor-pointer"}
         animate-in fade-in slide-in-from-bottom-3`}
       style={{ animationDelay: `${index * 70}ms`, animationFillMode: "both" }}
       onClick={manageMode ? undefined : onClick}
@@ -156,7 +155,7 @@ export function ListingCard({
               <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" className="shrink-0">
                 <rect width="8" height="8" rx="2" />
               </svg>
-              PG.com
+              Mera PG
             </span>
           </div>
         )}
